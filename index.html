@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finance X</title>
+<title>Finance Duo Pro</title>
 
 <style>
 *{box-sizing:border-box}
@@ -14,21 +14,13 @@ font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 background:#0f172a;
 }
 
-/* контейнер */
 .app{
 max-width:430px;
 margin:auto;
 min-height:100vh;
-padding:30px 22px;
+padding:28px 20px;
 background:linear-gradient(180deg,#ffffff,#f8fafc);
 border-radius:35px;
-animation:fadeIn 0.6s ease;
-}
-
-/* плавное появление */
-@keyframes fadeIn{
-from{opacity:0; transform:translateY(20px)}
-to{opacity:1; transform:translateY(0)}
 }
 
 .title{
@@ -36,126 +28,108 @@ text-align:center;
 font-weight:600;
 font-size:18px;
 letter-spacing:2px;
+margin-bottom:20px;
 color:#334155;
-margin-bottom:30px;
 }
 
 .balance{
 text-align:center;
-font-size:48px;
+font-size:44px;
 font-weight:700;
-margin-bottom:30px;
-transition:0.3s;
+margin-bottom:25px;
 }
 
 .positive{color:#16a34a}
 .negative{color:#dc2626}
 
-/* карточки доход/расход */
-.summary{
-display:flex;
-gap:12px;
-margin-bottom:30px;
-}
-
-.card{
-flex:1;
-padding:18px;
-border-radius:24px;
-text-align:center;
-font-size:14px;
+.sectionTitle{
+font-size:13px;
 font-weight:600;
-transition:0.3s;
+margin:20px 0 10px;
+color:#64748b;
 }
 
-.incomeCard{
-background:rgba(22,163,74,0.08);
-color:#16a34a;
+.userStats{
+display:flex;
+gap:10px;
+margin-bottom:15px;
 }
 
-.expenseCard{
-background:rgba(220,38,38,0.08);
-color:#dc2626;
+.userCard{
+flex:1;
+padding:14px;
+border-radius:18px;
+font-size:12px;
+font-weight:600;
+background:#f1f5f9;
 }
 
-/* переключатель */
+.ira{border-left:4px solid #16a34a}
+.misha{border-left:4px solid #2563eb}
+
+.users{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.users button{
+flex:1;
+padding:10px;
+border:none;
+border-radius:18px;
+background:#e2e8f0;
+font-weight:600;
+}
+
+.activeUser{
+background:#111827 !important;
+color:white;
+}
+
 .switch{
 display:flex;
-background:#eef2f7;
-border-radius:25px;
-padding:4px;
-margin-bottom:18px;
-position:relative;
+gap:10px;
+margin-bottom:15px;
 }
 
 .switch button{
 flex:1;
 padding:12px;
 border:none;
-background:transparent;
+border-radius:20px;
 font-weight:600;
-font-size:14px;
-z-index:2;
 }
 
-.slider{
-position:absolute;
-top:4px;
-bottom:4px;
-width:50%;
-border-radius:22px;
-background:#111827;
-transition:0.3s;
-}
+.incomeBtn{background:#dcfce7;color:#166534}
+.expenseBtn{background:#fee2e2;color:#991b1b}
 
-.slider.right{
-left:50%;
-}
-
-.slider.left{
-left:0%;
-}
-
-/* поля */
 input{
 width:100%;
-padding:16px;
-border-radius:25px;
+padding:14px;
+border-radius:20px;
 border:none;
 background:#eef2f7;
+margin-bottom:12px;
 font-size:15px;
 outline:none;
-margin-bottom:15px;
-transition:0.2s;
 }
 
-input:focus{
-background:#e2e8f0;
-}
-
-/* кнопки */
 button.main{
 width:100%;
-padding:16px;
-border-radius:28px;
+padding:15px;
+border-radius:25px;
 border:none;
 background:#111827;
 color:white;
 font-weight:600;
-font-size:15px;
 margin-bottom:12px;
-transition:0.25s;
-}
-
-button.main:active{
-transform:scale(0.96);
 }
 
 button.secondary{
 background:#94a3b8;
 }
 
-/* история */
 .history{
 margin-top:20px;
 }
@@ -163,49 +137,54 @@ margin-top:20px;
 .item{
 display:flex;
 justify-content:space-between;
-padding:16px 0;
+padding:14px 0;
 border-bottom:1px solid #e2e8f0;
-font-size:15px;
-animation:itemFade 0.3s ease;
-}
-
-@keyframes itemFade{
-from{opacity:0; transform:translateX(-10px)}
-to{opacity:1; transform:translateX(0)}
+font-size:14px;
 }
 
 .income{color:#16a34a;font-weight:600}
 .expense{color:#dc2626;font-weight:600}
 
-.delete{
-margin-left:10px;
-color:#cbd5e1;
-cursor:pointer;
-transition:0.2s;
-}
-
-.delete:active{
-color:#ef4444;
+.author{
+font-size:11px;
+opacity:0.6;
 }
 </style>
 </head>
 <body>
 
-<div class="app" onclick="hideKeyboard(event)">
+<div class="app">
 
-<div class="title">FINANCE X</div>
+<div class="title">FINANCE DUO PRO</div>
 
-<div class="balance" id="balance">0 грн</div>
+<div class="balance" id="totalBalance">0 грн</div>
 
-<div class="summary">
-<div class="card incomeCard">Доходи<br><span id="incomeTotal">0</span> грн</div>
-<div class="card expenseCard">Витрати<br><span id="expenseTotal">0</span> грн</div>
+<div class="sectionTitle">Баланс кожного</div>
+
+<div class="userStats">
+<div class="userCard ira">
+Іра<br>
+<span id="iraIncome">0</span> / <span id="iraExpense">0</span><br>
+Баланс: <span id="iraBalance">0</span>
+</div>
+
+<div class="userCard misha">
+Міша<br>
+<span id="mishaIncome">0</span> / <span id="mishaExpense">0</span><br>
+Баланс: <span id="mishaBalance">0</span>
+</div>
+</div>
+
+<div class="sectionTitle">Додати операцію</div>
+
+<div class="users">
+<button id="iraBtn" onclick="setUser('Іра')">Іра</button>
+<button id="mishaBtn" onclick="setUser('Міша')">Міша</button>
 </div>
 
 <div class="switch">
-<div id="slider" class="slider left"></div>
-<button onclick="setType('income')">Дохід</button>
-<button onclick="setType('expense')">Витрата</button>
+<button class="incomeBtn" onclick="setType('income')">Дохід</button>
+<button class="expenseBtn" onclick="setType('expense')">Витрата</button>
 </div>
 
 <input type="number" id="amount" placeholder="Сума">
@@ -224,18 +203,22 @@ color:#ef4444;
 <script>
 
 let data=JSON.parse(localStorage.getItem("financeApp"))||[];
+let currentUser=localStorage.getItem("financeUser")||"Іра";
 let currentType="income";
 
-function hideKeyboard(e){
-if(e.target.tagName!=="INPUT"){
-document.activeElement.blur();
+function setUser(name){
+currentUser=name;
+localStorage.setItem("financeUser",name);
+document.getElementById("iraBtn").classList.remove("activeUser");
+document.getElementById("mishaBtn").classList.remove("activeUser");
+if(name==="Іра")document.getElementById("iraBtn").classList.add("activeUser");
+else document.getElementById("mishaBtn").classList.add("activeUser");
 }
-}
+
+setUser(currentUser);
 
 function setType(type){
 currentType=type;
-let slider=document.getElementById("slider");
-slider.className="slider "+(type==="income"?"left":"right");
 }
 
 function save(){
@@ -243,34 +226,51 @@ localStorage.setItem("financeApp",JSON.stringify(data));
 }
 
 function render(){
-let incomeTotal=0;
-let expenseTotal=0;
+
+let iraIncome=0, iraExpense=0;
+let mishaIncome=0, mishaExpense=0;
+
 let list=document.getElementById("list");
 list.innerHTML="";
 
-data.forEach((item,index)=>{
-if(item.type==="income")incomeTotal+=item.amount;
-else expenseTotal+=item.amount;
+data.forEach(item=>{
+if(item.author==="Іра"){
+if(item.type==="income")iraIncome+=item.amount;
+else iraExpense+=item.amount;
+}else{
+if(item.type==="income")mishaIncome+=item.amount;
+else mishaExpense+=item.amount;
+}
 
 let div=document.createElement("div");
 div.className="item";
 div.innerHTML=`
-<span>${item.category}</span>
-<span class="${item.type}">
-${item.type==="income"?"+ ":"- "}${item.amount.toFixed(2)} грн
-<span class="delete" onclick="remove(${index})">✕</span>
-</span>
+<div>
+${item.category}
+<div class="author">${item.author}</div>
+</div>
+<div class="${item.type}">
+${item.type==="income"?"+ ":"- "}${item.amount.toFixed(2)}
+</div>
 `;
 list.appendChild(div);
 });
 
-let balance=incomeTotal-expenseTotal;
-document.getElementById("incomeTotal").innerText=incomeTotal.toFixed(2);
-document.getElementById("expenseTotal").innerText=expenseTotal.toFixed(2);
+let iraBalance=iraIncome-iraExpense;
+let mishaBalance=mishaIncome-mishaExpense;
+let totalBalance=iraBalance+mishaBalance;
 
-let balanceEl=document.getElementById("balance");
-balanceEl.innerText=balance.toFixed(2)+" грн";
-balanceEl.className="balance "+(balance>=0?"positive":"negative");
+document.getElementById("iraIncome").innerText=iraIncome.toFixed(0);
+document.getElementById("iraExpense").innerText=iraExpense.toFixed(0);
+document.getElementById("iraBalance").innerText=iraBalance.toFixed(0);
+
+document.getElementById("mishaIncome").innerText=mishaIncome.toFixed(0);
+document.getElementById("mishaExpense").innerText=mishaExpense.toFixed(0);
+document.getElementById("mishaBalance").innerText=mishaBalance.toFixed(0);
+
+let totalEl=document.getElementById("totalBalance");
+totalEl.innerText=totalBalance.toFixed(0)+" грн";
+totalEl.className="balance "+(totalBalance>=0?"positive":"negative");
 }
 
 function add(){
@@ -278,26 +278,20 @@ let amount=parseFloat(document.getElementById("amount").value);
 let category=document.getElementById("category").value;
 if(!amount||!category)return;
 
-data.unshift({type:currentType,amount,category});
+data.unshift({type:currentType,amount,category,author:currentUser});
 save();
 render();
+
 document.getElementById("amount").value="";
 document.getElementById("category").value="";
 }
 
-function remove(index){
-data.splice(index,1);
-save();
-render();
-}
-
 function exportData(){
-if(data.length===0){alert("Немає даних");return;}
 const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
 const url=URL.createObjectURL(blob);
 const a=document.createElement("a");
 a.href=url;
-a.download="finance-backup.json";
+a.download="finance-duo-pro.json";
 a.click();
 URL.revokeObjectURL(url);
 }
@@ -313,10 +307,7 @@ if(!Array.isArray(imported))return;
 data=[...imported,...data];
 save();
 render();
-alert("Імпорт успішний");
-}catch{
-alert("Помилка імпорту");
-}
+}catch{}
 };
 reader.readAsText(file);
 }
