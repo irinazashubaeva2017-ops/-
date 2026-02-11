@@ -3,28 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TEQRA Finance Cloud</title>
+<title>TEQRA Finance</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
 body{
 margin:0;
 font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:#0f1117;
-color:white;
+background:#0e1116;
+color:#e5e7eb;
 touch-action:manipulation;
 }
 
 .app{
-max-width:420px;
+max-width:430px;
 margin:auto;
-padding:25px;
+padding:28px 20px 40px;
+min-height:100vh;
+}
+
+.title{
+text-align:center;
+font-size:15px;
+letter-spacing:3px;
+opacity:0.5;
+margin-bottom:25px;
 }
 
 .balance{
 text-align:center;
 font-size:42px;
-margin-bottom:20px;
-font-weight:600;
+font-weight:700;
+margin-bottom:25px;
 transition:0.3s;
 }
 
@@ -42,15 +53,15 @@ flex:1;
 padding:12px;
 border-radius:16px;
 border:1px solid #2a2f38;
-background:#1a1f27;
-color:#aaa;
+background:#161b22;
+color:#9ca3af;
 font-weight:500;
 }
 
 .active{
-background:#2563eb !important;
+background:#1f2937 !important;
 color:white !important;
-border-color:#2563eb !important;
+border-color:#3b82f6 !important;
 }
 
 input{
@@ -58,19 +69,23 @@ width:100%;
 padding:14px;
 border-radius:16px;
 border:1px solid #2a2f38;
-background:#1a1f27;
+background:#161b22;
 color:white;
 margin-bottom:12px;
 font-size:14px;
 outline:none;
 }
 
+input:focus{
+border-color:#3b82f6;
+}
+
 button.main{
 width:100%;
 padding:14px;
-border-radius:20px;
+border-radius:18px;
 border:none;
-background:#2563eb;
+background:#3b82f6;
 color:white;
 font-weight:600;
 margin-bottom:20px;
@@ -79,36 +94,57 @@ margin-bottom:20px;
 .item{
 display:flex;
 justify-content:space-between;
-padding:12px 0;
+padding:14px 0;
 border-bottom:1px solid #1f242c;
 font-size:14px;
 }
 
+.actions span{
+cursor:pointer;
+font-size:12px;
+margin-left:10px;
+opacity:0.6;
+}
+
 .income{color:#22c55e}
 .expense{color:#ef4444}
+
+.denied{
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-size:18px;
+}
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<div id="denied" class="denied" style="display:none;">
+Доступ заборонено
+</div>
 
-<div class="balance positive" id="total">0 грн</div>
+<div class="app" id="app" style="display:none;">
+
+<div class="title">TEQRA • PRIVATE FINANCE</div>
+
+<div class="balance" id="total">0 грн</div>
 
 <div class="switch">
-<button id="iraBtn" class="active" onclick="setUser('Іра')">Іра</button>
+<button id="iraBtn" onclick="setUser('Іра')" class="active">Іра</button>
 <button id="mishaBtn" onclick="setUser('Міша')">Міша</button>
 </div>
 
 <div class="switch">
-<button id="incomeBtn" class="active" onclick="setType('income')">Дохід</button>
+<button id="incomeBtn" onclick="setType('income')" class="active">Дохід</button>
 <button id="expenseBtn" onclick="setType('expense')">Витрата</button>
 </div>
 
-<input type="number" id="amount" placeholder="Сума" inputmode="decimal">
+<input type="number" inputmode="decimal" id="amount" placeholder="Сума">
 <input type="text" id="category" placeholder="Категорія">
 
-<button class="main" onclick="addOperation()">Додати</button>
+<button class="main" onclick="addOrUpdate()">Додати</button>
 
 <div id="list"></div>
 
@@ -117,7 +153,7 @@ font-size:14px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
@@ -128,58 +164,80 @@ const firebaseConfig = {
   appId: "1:386010317837:web:88a24adc90b403e42a4144"
 };
 
+const allowedIds = [7255848995, 921509542];
+
+const tg = window.Telegram.WebApp;
+tg.ready();
+const userId = tg.initDataUnsafe?.user?.id;
+
+if(!allowedIds.includes(userId)){
+  document.getElementById("denied").style.display="flex";
+}else{
+  document.getElementById("app").style.display="block";
+}
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const operationsRef = collection(db, "operations");
 
-let currentUser = "Іра";
-let currentType = "income";
+let currentUser="Іра";
+let currentType="income";
+let editId=null;
 
-window.setUser = function(user){
-  currentUser = user;
-  document.getElementById("iraBtn").classList.toggle("active", user==="Іра");
-  document.getElementById("mishaBtn").classList.toggle("active", user==="Міша");
+window.setUser=function(user){
+  currentUser=user;
+  document.getElementById("iraBtn").classList.toggle("active",user==="Іра");
+  document.getElementById("mishaBtn").classList.toggle("active",user==="Міша");
 }
 
-window.setType = function(type){
-  currentType = type;
-  document.getElementById("incomeBtn").classList.toggle("active", type==="income");
-  document.getElementById("expenseBtn").classList.toggle("active", type==="expense");
+window.setType=function(type){
+  currentType=type;
+  document.getElementById("incomeBtn").classList.toggle("active",type==="income");
+  document.getElementById("expenseBtn").classList.toggle("active",type==="expense");
 }
 
-window.addOperation = async function(){
-  const amount = parseFloat(document.getElementById("amount").value);
-  const category = document.getElementById("category").value;
+window.addOrUpdate=async function(){
+  const amount=parseFloat(document.getElementById("amount").value);
+  const category=document.getElementById("category").value;
+  if(!amount||!category)return;
 
-  if(!amount || !category) return;
-
-  await addDoc(operationsRef,{
-    amount,
-    category,
-    type: currentType,
-    author: currentUser,
-    createdAt: new Date()
-  });
+  if(editId){
+    await updateDoc(doc(db,"operations",editId),{
+      amount,category,type:currentType,author:currentUser
+    });
+    editId=null;
+  }else{
+    await addDoc(operationsRef,{
+      amount,category,type:currentType,author:currentUser,createdAt:new Date()
+    });
+  }
 
   document.getElementById("amount").value="";
   document.getElementById("category").value="";
 }
 
 function render(snapshot){
-  const list = document.getElementById("list");
+  const list=document.getElementById("list");
   list.innerHTML="";
   let total=0;
 
   snapshot.forEach(docSnap=>{
-    const item = docSnap.data();
-    total += item.type==="income" ? item.amount : -item.amount;
+    const item=docSnap.data();
+    const id=docSnap.id;
+    total+=item.type==="income"?item.amount:-item.amount;
 
     const div=document.createElement("div");
     div.className="item";
     div.innerHTML=`
       <div>${item.category} (${item.author})</div>
-      <div class="${item.type}">
-        ${item.type==="income"?"+":"-"} ${item.amount}
+      <div>
+        <span class="${item.type}">
+          ${item.type==="income"?"+":"-"} ${item.amount}
+        </span>
+        <span class="actions">
+          <span onclick="editOp('${id}','${item.type}','${item.author}',${item.amount},'${item.category}')">Ред.</span>
+          <span onclick="deleteOp('${id}')">Вид.</span>
+        </span>
       </div>
     `;
     list.appendChild(div);
@@ -190,7 +248,21 @@ function render(snapshot){
   totalEl.className="balance "+(total>=0?"positive":"negative");
 }
 
-onSnapshot(query(operationsRef, orderBy("createdAt","desc")), render);
+window.deleteOp=async function(id){
+  await deleteDoc(doc(db,"operations",id));
+}
+
+window.editOp=function(id,type,author,amount,category){
+  editId=id;
+  currentType=type;
+  currentUser=author;
+  setUser(author);
+  setType(type);
+  document.getElementById("amount").value=amount;
+  document.getElementById("category").value=category;
+}
+
+onSnapshot(query(operationsRef,orderBy("createdAt","desc")),render);
 
 </script>
 
