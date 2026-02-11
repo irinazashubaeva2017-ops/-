@@ -11,68 +11,81 @@ html,body{
 margin:0;
 padding:0;
 font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:#0b1020;
+background:#0f172a;
 }
 
+/* контейнер */
 .app{
 max-width:430px;
 margin:auto;
 min-height:100vh;
-padding:25px 20px;
-background:#ffffff;
+padding:30px 22px;
+background:linear-gradient(180deg,#ffffff,#f8fafc);
 border-radius:35px;
+animation:fadeIn 0.6s ease;
+}
+
+/* плавное появление */
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(20px)}
+to{opacity:1; transform:translateY(0)}
 }
 
 .title{
 text-align:center;
 font-weight:600;
-font-size:20px;
-margin-bottom:25px;
-letter-spacing:1px;
+font-size:18px;
+letter-spacing:2px;
+color:#334155;
+margin-bottom:30px;
 }
 
 .balance{
 text-align:center;
-font-size:42px;
+font-size:48px;
 font-weight:700;
-margin-bottom:25px;
+margin-bottom:30px;
+transition:0.3s;
 }
 
 .positive{color:#16a34a}
 .negative{color:#dc2626}
 
+/* карточки доход/расход */
 .summary{
 display:flex;
-justify-content:space-between;
-margin-bottom:25px;
-font-weight:600;
+gap:12px;
+margin-bottom:30px;
 }
 
-.summary div{
-width:48%;
-padding:14px;
-border-radius:20px;
+.card{
+flex:1;
+padding:18px;
+border-radius:24px;
 text-align:center;
 font-size:14px;
+font-weight:600;
+transition:0.3s;
 }
 
-.incomeBox{
-background:#ecfdf5;
+.incomeCard{
+background:rgba(22,163,74,0.08);
 color:#16a34a;
 }
 
-.expenseBox{
-background:#fef2f2;
+.expenseCard{
+background:rgba(220,38,38,0.08);
 color:#dc2626;
 }
 
 /* переключатель */
 .switch{
 display:flex;
-background:#f1f5f9;
-border-radius:20px;
-margin-bottom:10px;
-overflow:hidden;
+background:#eef2f7;
+border-radius:25px;
+padding:4px;
+margin-bottom:18px;
+position:relative;
 }
 
 .switch button{
@@ -82,45 +95,67 @@ border:none;
 background:transparent;
 font-weight:600;
 font-size:14px;
+z-index:2;
 }
 
-.activeIncome{
-background:#16a34a;
-color:white;
+.slider{
+position:absolute;
+top:4px;
+bottom:4px;
+width:50%;
+border-radius:22px;
+background:#111827;
+transition:0.3s;
 }
 
-.activeExpense{
-background:#dc2626;
-color:white;
+.slider.right{
+left:50%;
 }
 
+.slider.left{
+left:0%;
+}
+
+/* поля */
 input{
 width:100%;
-padding:14px;
-border-radius:20px;
+padding:16px;
+border-radius:25px;
 border:none;
-background:#f1f5f9;
+background:#eef2f7;
 font-size:15px;
 outline:none;
-margin-bottom:10px;
+margin-bottom:15px;
+transition:0.2s;
 }
 
-.mainBtn{
+input:focus{
+background:#e2e8f0;
+}
+
+/* кнопки */
+button.main{
 width:100%;
-padding:15px;
-border-radius:20px;
+padding:16px;
+border-radius:28px;
 border:none;
 background:#111827;
 color:white;
-font-size:15px;
 font-weight:600;
-margin-top:8px;
+font-size:15px;
+margin-bottom:12px;
+transition:0.25s;
 }
 
-.secondary{
-background:#64748b;
+button.main:active{
+transform:scale(0.96);
 }
 
+button.secondary{
+background:#94a3b8;
+}
+
+/* история */
 .history{
 margin-top:20px;
 }
@@ -128,9 +163,15 @@ margin-top:20px;
 .item{
 display:flex;
 justify-content:space-between;
-padding:14px 0;
-border-bottom:1px solid #e5e7eb;
+padding:16px 0;
+border-bottom:1px solid #e2e8f0;
 font-size:15px;
+animation:itemFade 0.3s ease;
+}
+
+@keyframes itemFade{
+from{opacity:0; transform:translateX(-10px)}
+to{opacity:1; transform:translateX(0)}
 }
 
 .income{color:#16a34a;font-weight:600}
@@ -138,8 +179,13 @@ font-size:15px;
 
 .delete{
 margin-left:10px;
-color:#999;
+color:#cbd5e1;
 cursor:pointer;
+transition:0.2s;
+}
+
+.delete:active{
+color:#ef4444;
 }
 </style>
 </head>
@@ -152,22 +198,22 @@ cursor:pointer;
 <div class="balance" id="balance">0 грн</div>
 
 <div class="summary">
-<div class="incomeBox">Доходи<br><span id="incomeTotal">0</span> грн</div>
-<div class="expenseBox">Витрати<br><span id="expenseTotal">0</span> грн</div>
+<div class="card incomeCard">Доходи<br><span id="incomeTotal">0</span> грн</div>
+<div class="card expenseCard">Витрати<br><span id="expenseTotal">0</span> грн</div>
 </div>
 
 <div class="switch">
-<button id="incomeBtn" class="activeIncome" onclick="setType('income')">Дохід</button>
-<button id="expenseBtn" onclick="setType('expense')">Витрата</button>
+<div id="slider" class="slider left"></div>
+<button onclick="setType('income')">Дохід</button>
+<button onclick="setType('expense')">Витрата</button>
 </div>
 
 <input type="number" id="amount" placeholder="Сума">
 <input type="text" id="category" placeholder="Категорія">
 
-<button class="mainBtn" onclick="add()">Додати</button>
-<button class="mainBtn secondary" onclick="exportData()">Експорт</button>
-<button class="mainBtn secondary" onclick="document.getElementById('importFile').click()">Імпорт</button>
-<button class="mainBtn secondary" onclick="changePassword()">Змінити пароль</button>
+<button class="main" onclick="add()">Додати</button>
+<button class="main secondary" onclick="exportData()">Експорт</button>
+<button class="main secondary" onclick="document.getElementById('importFile').click()">Імпорт</button>
 
 <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
 
@@ -178,7 +224,6 @@ cursor:pointer;
 <script>
 
 let data=JSON.parse(localStorage.getItem("financeApp"))||[];
-let PASSWORD=localStorage.getItem("financePassword")||"1234";
 let currentType="income";
 
 function hideKeyboard(e){
@@ -189,13 +234,8 @@ document.activeElement.blur();
 
 function setType(type){
 currentType=type;
-document.getElementById("incomeBtn").className="";
-document.getElementById("expenseBtn").className="";
-if(type==="income"){
-document.getElementById("incomeBtn").className="activeIncome";
-}else{
-document.getElementById("expenseBtn").className="activeExpense";
-}
+let slider=document.getElementById("slider");
+slider.className="slider "+(type==="income"?"left":"right");
 }
 
 function save(){
@@ -238,7 +278,7 @@ let amount=parseFloat(document.getElementById("amount").value);
 let category=document.getElementById("category").value;
 if(!amount||!category)return;
 
-data.unshift({type:currentType,amount,category,date:new Date()});
+data.unshift({type:currentType,amount,category});
 save();
 render();
 document.getElementById("amount").value="";
@@ -253,8 +293,7 @@ render();
 
 function exportData(){
 if(data.length===0){alert("Немає даних");return;}
-let protectedData={password:PASSWORD,payload:data};
-const blob=new Blob([JSON.stringify(protectedData,null,2)],{type:"application/json"});
+const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
 const url=URL.createObjectURL(blob);
 const a=document.createElement("a");
 a.href=url;
@@ -266,14 +305,12 @@ URL.revokeObjectURL(url);
 function importData(event){
 const file=event.target.files[0];
 if(!file)return;
-
 const reader=new FileReader();
 reader.onload=function(e){
 try{
 const imported=JSON.parse(e.target.result);
-let entered=prompt("Введіть пароль:");
-if(entered!==imported.password){alert("Невірний пароль");return;}
-data=[...imported.payload,...data];
+if(!Array.isArray(imported))return;
+data=[...imported,...data];
 save();
 render();
 alert("Імпорт успішний");
@@ -282,15 +319,6 @@ alert("Помилка імпорту");
 }
 };
 reader.readAsText(file);
-}
-
-function changePassword(){
-let newPass=prompt("Новий пароль:");
-if(newPass){
-PASSWORD=newPass;
-localStorage.setItem("financePassword",newPass);
-alert("Пароль змінено");
-}
 }
 
 render();
