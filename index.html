@@ -2,330 +2,197 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TEQRA Finance</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TEQRA Finance Cloud</title>
 
 <style>
-*{box-sizing:border-box}
-html,body{
+body{
 margin:0;
-padding:0;
 font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:#0e1116;
-color:#e5e7eb;
+background:#0f1117;
+color:white;
+touch-action:manipulation;
 }
 
-/* контейнер */
 .app{
-max-width:430px;
+max-width:420px;
 margin:auto;
-padding:28px 20px 40px;
-min-height:100vh;
+padding:25px;
 }
 
-/* заголовок */
-.title{
-text-align:center;
-font-size:16px;
-letter-spacing:3px;
-opacity:0.6;
-margin-bottom:25px;
-}
-
-/* баланс */
 .balance{
 text-align:center;
-font-size:44px;
-font-weight:700;
-margin-bottom:30px;
+font-size:42px;
+margin-bottom:20px;
+font-weight:600;
 transition:0.3s;
 }
 
 .positive{color:#22c55e}
 .negative{color:#ef4444}
 
-/* карточки */
-.stats{
-display:flex;
-gap:12px;
-margin-bottom:25px;
-}
-
-.card{
-flex:1;
-padding:18px;
-border-radius:20px;
-background:#161b22;
-border:1px solid #22262e;
-font-size:13px;
-}
-
-.card strong{
-display:block;
-margin-bottom:6px;
-}
-
-/* переключатели */
 .switch{
 display:flex;
 gap:10px;
-margin-bottom:15px;
+margin-bottom:12px;
 }
 
 .switch button{
 flex:1;
-padding:14px;
-border-radius:20px;
+padding:12px;
+border-radius:16px;
 border:1px solid #2a2f38;
-background:#161b22;
-color:#9ca3af;
+background:#1a1f27;
+color:#aaa;
 font-weight:500;
 }
 
 .active{
-background:#1f2937 !important;
+background:#2563eb !important;
 color:white !important;
-border-color:#3b82f6 !important;
+border-color:#2563eb !important;
 }
 
-/* поля */
 input{
 width:100%;
-padding:15px;
-border-radius:20px;
+padding:14px;
+border-radius:16px;
 border:1px solid #2a2f38;
-background:#161b22;
+background:#1a1f27;
 color:white;
-margin-bottom:14px;
-font-size:15px;
+margin-bottom:12px;
+font-size:14px;
 outline:none;
 }
 
-input:focus{
-border-color:#3b82f6;
-}
-
-/* кнопки */
 button.main{
 width:100%;
-padding:16px;
-border-radius:24px;
+padding:14px;
+border-radius:20px;
 border:none;
-background:#3b82f6;
+background:#2563eb;
 color:white;
 font-weight:600;
-margin-bottom:15px;
-transition:0.2s;
-}
-
-button.main:active{
-transform:scale(0.97);
-}
-
-.history{
-margin-top:25px;
+margin-bottom:20px;
 }
 
 .item{
 display:flex;
 justify-content:space-between;
-align-items:center;
-padding:16px 0;
+padding:12px 0;
 border-bottom:1px solid #1f242c;
 font-size:14px;
-}
-
-.itemInfo{
-display:flex;
-flex-direction:column;
-}
-
-.author{
-font-size:11px;
-opacity:0.5;
-margin-top:3px;
-}
-
-.actions{
-display:flex;
-gap:10px;
-font-size:12px;
-opacity:0.6;
-}
-
-.actions span{
-cursor:pointer;
 }
 
 .income{color:#22c55e}
 .expense{color:#ef4444}
 </style>
 </head>
+
 <body>
 
-<div class="app" onclick="hideKeyboard(event)">
+<div class="app">
 
-<div class="title">TEQRA FINANCE</div>
-
-<div class="balance" id="totalBalance">0 грн</div>
-
-<div class="stats">
-<div class="card">
-<strong>Іра</strong>
-Доходи: <span id="iraIncome">0</span><br>
-Витрати: <span id="iraExpense">0</span><br>
-Баланс: <span id="iraBalance">0</span>
-</div>
-
-<div class="card">
-<strong>Міша</strong>
-Доходи: <span id="mishaIncome">0</span><br>
-Витрати: <span id="mishaExpense">0</span><br>
-Баланс: <span id="mishaBalance">0</span>
-</div>
-</div>
+<div class="balance positive" id="total">0 грн</div>
 
 <div class="switch">
-<button id="iraBtn" onclick="setUser('Іра')">Іра</button>
+<button id="iraBtn" class="active" onclick="setUser('Іра')">Іра</button>
 <button id="mishaBtn" onclick="setUser('Міша')">Міша</button>
 </div>
 
 <div class="switch">
-<button id="incomeBtn" onclick="setType('income')">Дохід</button>
+<button id="incomeBtn" class="active" onclick="setType('income')">Дохід</button>
 <button id="expenseBtn" onclick="setType('expense')">Витрата</button>
 </div>
 
-<input type="number" inputmode="decimal" id="amount" placeholder="Сума">
+<input type="number" id="amount" placeholder="Сума" inputmode="decimal">
 <input type="text" id="category" placeholder="Категорія">
 
-<button class="main" onclick="add()">Додати</button>
+<button class="main" onclick="addOperation()">Додати</button>
 
-<div class="history" id="list"></div>
+<div id="list"></div>
 
 </div>
 
-<script>
+<script type="module">
 
-let data=JSON.parse(localStorage.getItem("financeApp"))||[];
-let currentUser="Іра";
-let currentType="income";
-let editIndex=null;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-function hideKeyboard(e){
-if(e.target.tagName!=="INPUT"){
-document.activeElement.blur();
-}
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
+  authDomain: "finance-eec75.firebaseapp.com",
+  projectId: "finance-eec75",
+  storageBucket: "finance-eec75.appspot.com",
+  messagingSenderId: "386010317837",
+  appId: "1:386010317837:web:88a24adc90b403e42a4144"
+};
 
-function setUser(name){
-currentUser=name;
-document.getElementById("iraBtn").classList.remove("active");
-document.getElementById("mishaBtn").classList.remove("active");
-document.getElementById(name==="Іра"?"iraBtn":"mishaBtn").classList.add("active");
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const operationsRef = collection(db, "operations");
 
-function setType(type){
-currentType=type;
-document.getElementById("incomeBtn").classList.remove("active");
-document.getElementById("expenseBtn").classList.remove("active");
-document.getElementById(type==="income"?"incomeBtn":"expenseBtn").classList.add("active");
-}
+let currentUser = "Іра";
+let currentType = "income";
 
-setUser("Іра");
-setType("income");
-
-function save(){
-localStorage.setItem("financeApp",JSON.stringify(data));
+window.setUser = function(user){
+  currentUser = user;
+  document.getElementById("iraBtn").classList.toggle("active", user==="Іра");
+  document.getElementById("mishaBtn").classList.toggle("active", user==="Міша");
 }
 
-function render(){
-let iraIncome=0,iraExpense=0;
-let mishaIncome=0,mishaExpense=0;
-let list=document.getElementById("list");
-list.innerHTML="";
-
-data.forEach((item,index)=>{
-if(item.author==="Іра"){
-item.type==="income"?iraIncome+=item.amount:iraExpense+=item.amount;
-}else{
-item.type==="income"?mishaIncome+=item.amount:mishaExpense+=item.amount;
+window.setType = function(type){
+  currentType = type;
+  document.getElementById("incomeBtn").classList.toggle("active", type==="income");
+  document.getElementById("expenseBtn").classList.toggle("active", type==="expense");
 }
 
-let div=document.createElement("div");
-div.className="item";
-div.innerHTML=`
-<div class="itemInfo">
-${item.category}
-<div class="author">${item.author}</div>
-</div>
-<div>
-<span class="${item.type}">
-${item.type==="income"?"+":"-"} ${item.amount.toFixed(2)}
-</span>
-<div class="actions">
-<span onclick="edit(${index})">Редагувати</span>
-<span onclick="remove(${index})">Видалити</span>
-</div>
-</div>
-`;
-list.appendChild(div);
-});
+window.addOperation = async function(){
+  const amount = parseFloat(document.getElementById("amount").value);
+  const category = document.getElementById("category").value;
 
-let iraBalance=iraIncome-iraExpense;
-let mishaBalance=mishaIncome-mishaExpense;
-let total=iraBalance+mishaBalance;
+  if(!amount || !category) return;
 
-document.getElementById("iraIncome").innerText=iraIncome;
-document.getElementById("iraExpense").innerText=iraExpense;
-document.getElementById("iraBalance").innerText=iraBalance;
+  await addDoc(operationsRef,{
+    amount,
+    category,
+    type: currentType,
+    author: currentUser,
+    createdAt: new Date()
+  });
 
-document.getElementById("mishaIncome").innerText=mishaIncome;
-document.getElementById("mishaExpense").innerText=mishaExpense;
-document.getElementById("mishaBalance").innerText=mishaBalance;
-
-let totalEl=document.getElementById("totalBalance");
-totalEl.innerText=total+" грн";
-totalEl.className="balance "+(total>=0?"positive":"negative");
+  document.getElementById("amount").value="";
+  document.getElementById("category").value="";
 }
 
-function add(){
-let amount=parseFloat(document.getElementById("amount").value);
-let category=document.getElementById("category").value;
-if(!amount||!category)return;
+function render(snapshot){
+  const list = document.getElementById("list");
+  list.innerHTML="";
+  let total=0;
 
-if(editIndex!==null){
-data[editIndex]={type:currentType,amount,category,author:currentUser};
-editIndex=null;
-}else{
-data.unshift({type:currentType,amount,category,author:currentUser});
+  snapshot.forEach(docSnap=>{
+    const item = docSnap.data();
+    total += item.type==="income" ? item.amount : -item.amount;
+
+    const div=document.createElement("div");
+    div.className="item";
+    div.innerHTML=`
+      <div>${item.category} (${item.author})</div>
+      <div class="${item.type}">
+        ${item.type==="income"?"+":"-"} ${item.amount}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+
+  const totalEl=document.getElementById("total");
+  totalEl.innerText=total+" грн";
+  totalEl.className="balance "+(total>=0?"positive":"negative");
 }
 
-save();
-render();
-document.getElementById("amount").value="";
-document.getElementById("category").value="";
-}
-
-function edit(index){
-let item=data[index];
-editIndex=index;
-currentType=item.type;
-currentUser=item.author;
-setUser(item.author);
-setType(item.type);
-document.getElementById("amount").value=item.amount;
-document.getElementById("category").value=item.category;
-window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function remove(index){
-data.splice(index,1);
-save();
-render();
-}
-
-render();
+onSnapshot(query(operationsRef, orderBy("createdAt","desc")), render);
 
 </script>
+
 </body>
 </html>
