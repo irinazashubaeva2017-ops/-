@@ -2,40 +2,64 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Фінанси</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<meta name="viewport" 
+content="width=device-width, 
+initial-scale=1.0, 
+maximum-scale=1.0, 
+user-scalable=no">
+
+<title>Мій бюджет</title>
 
 <style>
-body {
+html, body {
     margin: 0;
+    padding: 0;
+    overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: linear-gradient(135deg, #1e293b, #0f172a);
+    background: #0f172a;
+}
+
+.wrapper {
+    height: 100vh;
     display: flex;
     justify-content: center;
-    padding: 20px;
+    align-items: center;
 }
 
 .app {
-    background: #ffffff;
     width: 100%;
-    max-width: 420px;
-    border-radius: 25px;
+    max-width: 430px;
+    height: 100vh;
+    background: #ffffff;
+    border-radius: 30px;
     padding: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .title {
     text-align: center;
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 22px;
+    font-weight: 600;
 }
+
+.summary {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.incomeTotal { color: #16a34a; }
+.expenseTotal { color: #dc2626; }
 
 .balance {
     text-align: center;
-    font-size: 28px;
+    font-size: 30px;
+    font-weight: 700;
     margin: 15px 0;
-    font-weight: bold;
 }
 
 .positive { color: #16a34a; }
@@ -44,77 +68,83 @@ body {
 .row {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px;
 }
 
 input, select {
     flex: 1;
-    padding: 10px;
-    border-radius: 12px;
-    border: 1px solid #ddd;
-    font-size: 14px;
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    font-size: 15px;
+    outline: none;
 }
 
 button {
     width: 100%;
-    padding: 12px;
-    border-radius: 15px;
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 18px;
     border: none;
     background: #0ea5e9;
     color: white;
-    font-weight: bold;
-    margin-top: 5px;
-}
-
-button:active {
-    transform: scale(0.98);
+    font-weight: 600;
+    font-size: 16px;
 }
 
 .history {
-    margin-top: 15px;
-    max-height: 250px;
+    margin-top: 20px;
     overflow-y: auto;
+    height: 40vh;
 }
 
 .item {
     display: flex;
     justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 15px;
 }
 
-.income { color: #16a34a; font-weight: bold; }
-.expense { color: #dc2626; font-weight: bold; }
+.income { color: #16a34a; font-weight: 600; }
+.expense { color: #dc2626; font-weight: 600; }
 
 .delete {
     margin-left: 8px;
     cursor: pointer;
-    color: #999;
+    color: #aaa;
 }
 </style>
 </head>
 
 <body>
 
+<div class="wrapper">
 <div class="app">
-    <div class="title">💸 Мій бюджет</div>
 
-    <div class="balance" id="balance">0 грн</div>
+<div class="title">💸 Мій бюджет</div>
 
-    <div class="row">
-        <select id="type">
-            <option value="income">➕</option>
-            <option value="expense">➖</option>
-        </select>
-        <input type="number" id="amount" placeholder="Сума">
-    </div>
+<div class="summary">
+    <div class="incomeTotal">Доходи: <span id="incomeTotal">0</span> грн</div>
+    <div class="expenseTotal">Витрати: <span id="expenseTotal">0</span> грн</div>
+</div>
 
-    <input type="text" id="category" placeholder="Категорія (їжа, продаж, авто...)">
+<div class="balance" id="balance">0 грн</div>
 
-    <button onclick="add()">Додати</button>
+<div class="row">
+    <select id="type">
+        <option value="income">➕</option>
+        <option value="expense">➖</option>
+    </select>
+    <input type="number" id="amount" placeholder="Сума">
+</div>
 
-    <div class="history" id="list"></div>
+<input type="text" id="category" placeholder="Категорія">
+
+<button onclick="add()">Додати</button>
+
+<div class="history" id="list"></div>
+
+</div>
 </div>
 
 <script>
@@ -125,14 +155,14 @@ function save() {
 }
 
 function render() {
+    let incomeTotal = 0;
+    let expenseTotal = 0;
     let list = document.getElementById("list");
-    let balanceEl = document.getElementById("balance");
     list.innerHTML = "";
-    let balance = 0;
 
     data.forEach((item, index) => {
-        if(item.type === "income") balance += item.amount;
-        else balance -= item.amount;
+        if(item.type === "income") incomeTotal += item.amount;
+        else expenseTotal += item.amount;
 
         let div = document.createElement("div");
         div.className = "item";
@@ -146,6 +176,12 @@ function render() {
         list.appendChild(div);
     });
 
+    let balance = incomeTotal - expenseTotal;
+
+    document.getElementById("incomeTotal").innerText = incomeTotal.toFixed(2);
+    document.getElementById("expenseTotal").innerText = expenseTotal.toFixed(2);
+
+    let balanceEl = document.getElementById("balance");
     balanceEl.innerText = balance.toFixed(2) + " грн";
     balanceEl.className = "balance " + (balance >= 0 ? "positive" : "negative");
 }
@@ -157,11 +193,7 @@ function add() {
 
     if(!amount || !category) return;
 
-    data.unshift({
-        type,
-        amount,
-        category
-    });
+    data.unshift({ type, amount, category });
 
     save();
     render();
