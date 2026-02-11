@@ -2,8 +2,8 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TEQRA Finance Universe</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEQRA Finance</title>
 
 <style>
 *{box-sizing:border-box}
@@ -11,60 +11,56 @@ html,body{
 margin:0;
 padding:0;
 font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:radial-gradient(circle at top,#1e293b,#0f172a 70%);
-color:white;
-overflow-x:hidden;
+background:#0e1116;
+color:#e5e7eb;
 }
 
 /* контейнер */
 .app{
 max-width:430px;
 margin:auto;
-min-height:100vh;
 padding:28px 20px 40px;
+min-height:100vh;
 }
 
 /* заголовок */
 .title{
 text-align:center;
-font-size:18px;
+font-size:16px;
 letter-spacing:3px;
-font-weight:600;
-margin-bottom:30px;
-opacity:0.9;
+opacity:0.6;
+margin-bottom:25px;
 }
 
 /* баланс */
 .balance{
 text-align:center;
-font-size:48px;
+font-size:44px;
 font-weight:700;
-margin-bottom:25px;
+margin-bottom:30px;
 transition:0.3s;
 }
 
 .positive{color:#22c55e}
 .negative{color:#ef4444}
 
-/* 3D карточки */
-.userStats{
+/* карточки */
+.stats{
 display:flex;
 gap:12px;
 margin-bottom:25px;
 }
 
-.userCard{
+.card{
 flex:1;
 padding:18px;
-border-radius:24px;
-background:linear-gradient(145deg,#1e293b,#111827);
-box-shadow:8px 8px 20px #0b1220,
--4px -4px 15px rgba(255,255,255,0.03);
-font-size:12px;
+border-radius:20px;
+background:#161b22;
+border:1px solid #22262e;
+font-size:13px;
 }
 
-.userCard strong{
-font-size:14px;
+.card strong{
 display:block;
 margin-bottom:6px;
 }
@@ -79,108 +75,109 @@ margin-bottom:15px;
 .switch button{
 flex:1;
 padding:14px;
-border:none;
-border-radius:25px;
-font-weight:600;
-background:#1e293b;
-color:#94a3b8;
-transition:0.25s;
+border-radius:20px;
+border:1px solid #2a2f38;
+background:#161b22;
+color:#9ca3af;
+font-weight:500;
 }
 
-.activeIncome{
-background:#16a34a !important;
+.active{
+background:#1f2937 !important;
 color:white !important;
-box-shadow:0 0 15px rgba(22,163,74,0.5);
+border-color:#3b82f6 !important;
 }
 
-.activeExpense{
-background:#dc2626 !important;
-color:white !important;
-box-shadow:0 0 15px rgba(220,38,38,0.5);
-}
-
-.users button.activeUser{
-background:#2563eb;
-color:white;
-box-shadow:0 0 12px rgba(37,99,235,0.6);
-}
-
+/* поля */
 input{
 width:100%;
-padding:16px;
-border-radius:25px;
-border:none;
-background:#1e293b;
+padding:15px;
+border-radius:20px;
+border:1px solid #2a2f38;
+background:#161b22;
 color:white;
-margin-bottom:15px;
-font-size:16px;
+margin-bottom:14px;
+font-size:15px;
 outline:none;
 }
 
-input::placeholder{
-color:#64748b;
+input:focus{
+border-color:#3b82f6;
 }
 
+/* кнопки */
 button.main{
 width:100%;
 padding:16px;
-border-radius:28px;
+border-radius:24px;
 border:none;
-background:linear-gradient(90deg,#2563eb,#7c3aed);
+background:#3b82f6;
 color:white;
 font-weight:600;
 margin-bottom:15px;
-transition:0.25s;
+transition:0.2s;
 }
 
 button.main:active{
-transform:scale(0.96);
+transform:scale(0.97);
 }
 
 .history{
-margin-top:20px;
+margin-top:25px;
 }
 
 .item{
 display:flex;
 justify-content:space-between;
-padding:14px 0;
-border-bottom:1px solid rgba(255,255,255,0.05);
+align-items:center;
+padding:16px 0;
+border-bottom:1px solid #1f242c;
 font-size:14px;
-animation:fade 0.3s ease;
 }
 
-@keyframes fade{
-from{opacity:0;transform:translateY(10px)}
-to{opacity:1;transform:translateY(0)}
+.itemInfo{
+display:flex;
+flex-direction:column;
 }
-
-.income{color:#22c55e}
-.expense{color:#ef4444}
 
 .author{
 font-size:11px;
 opacity:0.5;
+margin-top:3px;
 }
+
+.actions{
+display:flex;
+gap:10px;
+font-size:12px;
+opacity:0.6;
+}
+
+.actions span{
+cursor:pointer;
+}
+
+.income{color:#22c55e}
+.expense{color:#ef4444}
 </style>
 </head>
 <body>
 
 <div class="app" onclick="hideKeyboard(event)">
 
-<div class="title">TEQRA • FINANCE UNIVERSE</div>
+<div class="title">TEQRA FINANCE</div>
 
 <div class="balance" id="totalBalance">0 грн</div>
 
-<div class="userStats">
-<div class="userCard">
+<div class="stats">
+<div class="card">
 <strong>Іра</strong>
 Доходи: <span id="iraIncome">0</span><br>
 Витрати: <span id="iraExpense">0</span><br>
 Баланс: <span id="iraBalance">0</span>
 </div>
 
-<div class="userCard">
+<div class="card">
 <strong>Міша</strong>
 Доходи: <span id="mishaIncome">0</span><br>
 Витрати: <span id="mishaExpense">0</span><br>
@@ -188,7 +185,7 @@ opacity:0.5;
 </div>
 </div>
 
-<div class="switch users">
+<div class="switch">
 <button id="iraBtn" onclick="setUser('Іра')">Іра</button>
 <button id="mishaBtn" onclick="setUser('Міша')">Міша</button>
 </div>
@@ -208,9 +205,11 @@ opacity:0.5;
 </div>
 
 <script>
+
 let data=JSON.parse(localStorage.getItem("financeApp"))||[];
 let currentUser="Іра";
 let currentType="income";
+let editIndex=null;
 
 function hideKeyboard(e){
 if(e.target.tagName!=="INPUT"){
@@ -220,21 +219,19 @@ document.activeElement.blur();
 
 function setUser(name){
 currentUser=name;
-document.getElementById("iraBtn").classList.remove("activeUser");
-document.getElementById("mishaBtn").classList.remove("activeUser");
-document.getElementById(name==="Іра"?"iraBtn":"mishaBtn").classList.add("activeUser");
+document.getElementById("iraBtn").classList.remove("active");
+document.getElementById("mishaBtn").classList.remove("active");
+document.getElementById(name==="Іра"?"iraBtn":"mishaBtn").classList.add("active");
 }
-
-setUser("Іра");
 
 function setType(type){
 currentType=type;
-document.getElementById("incomeBtn").classList.remove("activeIncome");
-document.getElementById("expenseBtn").classList.remove("activeExpense");
-document.getElementById(type==="income"?"incomeBtn":"expenseBtn")
-.classList.add(type==="income"?"activeIncome":"activeExpense");
+document.getElementById("incomeBtn").classList.remove("active");
+document.getElementById("expenseBtn").classList.remove("active");
+document.getElementById(type==="income"?"incomeBtn":"expenseBtn").classList.add("active");
 }
 
+setUser("Іра");
 setType("income");
 
 function save(){
@@ -242,29 +239,33 @@ localStorage.setItem("financeApp",JSON.stringify(data));
 }
 
 function render(){
-let iraIncome=0, iraExpense=0;
-let mishaIncome=0, mishaExpense=0;
+let iraIncome=0,iraExpense=0;
+let mishaIncome=0,mishaExpense=0;
 let list=document.getElementById("list");
 list.innerHTML="";
 
-data.forEach(item=>{
+data.forEach((item,index)=>{
 if(item.author==="Іра"){
-if(item.type==="income")iraIncome+=item.amount;
-else iraExpense+=item.amount;
+item.type==="income"?iraIncome+=item.amount:iraExpense+=item.amount;
 }else{
-if(item.type==="income")mishaIncome+=item.amount;
-else mishaExpense+=item.amount;
+item.type==="income"?mishaIncome+=item.amount:mishaExpense+=item.amount;
 }
 
 let div=document.createElement("div");
 div.className="item";
 div.innerHTML=`
-<div>
+<div class="itemInfo">
 ${item.category}
 <div class="author">${item.author}</div>
 </div>
-<div class="${item.type}">
-${item.type==="income"?"+ ":"- "}${item.amount.toFixed(2)}
+<div>
+<span class="${item.type}">
+${item.type==="income"?"+":"-"} ${item.amount.toFixed(2)}
+</span>
+<div class="actions">
+<span onclick="edit(${index})">Редагувати</span>
+<span onclick="remove(${index})">Видалити</span>
+</div>
 </div>
 `;
 list.appendChild(div);
@@ -292,14 +293,39 @@ let amount=parseFloat(document.getElementById("amount").value);
 let category=document.getElementById("category").value;
 if(!amount||!category)return;
 
+if(editIndex!==null){
+data[editIndex]={type:currentType,amount,category,author:currentUser};
+editIndex=null;
+}else{
 data.unshift({type:currentType,amount,category,author:currentUser});
+}
+
 save();
 render();
 document.getElementById("amount").value="";
 document.getElementById("category").value="";
 }
 
+function edit(index){
+let item=data[index];
+editIndex=index;
+currentType=item.type;
+currentUser=item.author;
+setUser(item.author);
+setType(item.type);
+document.getElementById("amount").value=item.amount;
+document.getElementById("category").value=item.category;
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function remove(index){
+data.splice(index,1);
+save();
 render();
+}
+
+render();
+
 </script>
 </body>
 </html>
