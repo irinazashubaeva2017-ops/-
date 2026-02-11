@@ -1,338 +1,527 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TEQRA DUO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TEQRA DUO</title>
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0e1116;
+            color: #e5e7eb;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-<style>
-html,body{
-margin:0;
-padding:0;
-font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:#0e1116;
-color:#e5e7eb;
-}
+        .app {
+            max-width: 430px;
+            margin: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
 
-.app{
-max-width:430px;
-margin:auto;
-padding:20px;
-box-sizing:border-box;
-min-height:100vh;
-}
+        .title {
+            text-align: center;
+            font-size: 14px;
+            letter-spacing: 3px;
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
 
-.title{
-text-align:center;
-font-size:13px;
-letter-spacing:2px;
-opacity:0.5;
-margin-bottom:15px;
-}
+        .balance-card {
+            background: linear-gradient(145deg, #1f2937, #111827);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #374151;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
 
-.balance{
-text-align:center;
-font-size:36px;
-font-weight:700;
-margin-bottom:15px;
-}
+        .balance-label {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
 
-.cardRow{
-display:flex;
-gap:10px;
-margin-bottom:10px;
-}
+        .balance-amount {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
 
-.card{
-flex:1;
-background:#161b22;
-border:1px solid #22262e;
-border-radius:14px;
-padding:12px;
-font-size:12px;
-}
+        .cardRow {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
 
-.switch{
-display:flex;
-gap:10px;
-margin-bottom:10px;
-}
+        .card {
+            flex: 1;
+            background: #161b22;
+            border: 1px solid #22262e;
+            border-radius: 16px;
+            padding: 15px;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
 
-.switch button{
-flex:1;
-padding:10px;
-border-radius:12px;
-border:1px solid #2a2f38;
-background:#161b22;
-color:#9ca3af;
-}
+        .user-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: #fff;
+        }
 
-.active{
-background:#1f2937 !important;
-color:white !important;
-border-color:#3b82f6 !important;
-}
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            opacity: 0.8;
+        }
 
-input{
-width:100%;
-padding:12px;
-border-radius:12px;
-border:1px solid #2a2f38;
-background:#161b22;
-color:white;
-margin-bottom:10px;
-box-sizing:border-box;
-}
+        .highlight { color: #fff; font-weight: 600; }
 
-button.main{
-width:100%;
-padding:12px;
-border-radius:14px;
-border:none;
-background:#3b82f6;
-color:white;
-font-weight:600;
-margin-bottom:15px;
-}
+        .switch {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            background: #161b22;
+            padding: 4px;
+            border-radius: 16px;
+            border: 1px solid #22262e;
+        }
 
-.item{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:8px 0;
-border-bottom:1px solid #1f242c;
-font-size:12px;
-}
+        .switch button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            color: #9ca3af;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
 
-.income{color:#22c55e}
-.expense{color:#ef4444}
+        .switch button.active {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+        
+        /* Кольори для типу операції */
+        .switch button#expenseBtn.active {
+            background: #ef4444;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+        }
 
-.actions span{
-cursor:pointer;
-margin-left:8px;
-}
+        .switch button#incomeBtn.active {
+            background: #22c55e;
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+        }
 
-.analytics{
-margin-top:15px;
-background:#161b22;
-border:1px solid #22262e;
-border-radius:14px;
-padding:12px;
-font-size:12px;
-}
+        input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid #2a2f38;
+            background: #0d1117;
+            color: white;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus {
+            border-color: #3b82f6;
+        }
 
-.denied{
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-font-size:18px;
-}
-</style>
+        button.main {
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        button.main:active {
+            transform: scale(0.98);
+        }
+
+        .list-header {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding-left: 5px;
+            color: #9ca3af;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #161b22;
+            border: 1px solid #22262e;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .income-text { color: #22c55e; font-weight: 600; }
+        .expense-text { color: #ef4444; font-weight: 600; }
+
+        .meta {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-left: 10px;
+        }
+
+        .actions span {
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        
+        .actions span:hover { opacity: 1; }
+
+        .analytics {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #22262e;
+        }
+
+        .cat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #1f242c;
+            font-size: 12px;
+        }
+
+        .denied {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #ef4444;
+        }
+    </style>
 </head>
 
 <body>
 
 <div id="denied" class="denied" style="display:none;">
-Доступ заборонено
+    ⛔ Доступ заборонено
 </div>
 
-<div class="app" id="app" style="display:none;" onclick="hideKeyboard(event)">
+<div class="app" id="app" style="display:none;">
 
-<div class="title">TEQRA • DUO</div>
-<div class="balance" id="totalBalance">0 грн</div>
+    <div class="title">TEQRA • DUO</div>
+    
+    <div class="balance-card">
+        <div class="balance-label">Загальний баланс</div>
+        <div class="balance-amount" id="totalBalance">0</div>
+        <div style="font-size: 12px; margin-top: 5px; color: #9ca3af;">
+            Витрачено від доходу: <span id="percentUsed" style="color:#fff">0%</span>
+        </div>
+    </div>
 
-<div class="cardRow">
-<div class="card">
-<strong>Іра</strong><br>
-Дохід: <span id="iraIncome">0</span><br>
-Витрати: <span id="iraExpense">0</span><br>
-Баланс: <span id="iraBalance">0</span>
-</div>
-<div class="card">
-<strong>Міша</strong><br>
-Дохід: <span id="mishaIncome">0</span><br>
-Витрати: <span id="mishaExpense">0</span><br>
-Баланс: <span id="mishaBalance">0</span>
-</div>
-</div>
+    <div class="cardRow">
+        <div class="card">
+            <div class="user-title">Іра</div>
+            <div class="stat-row"><span>Вхід:</span> <span class="highlight" id="iraIncome">0</span></div>
+            <div class="stat-row"><span>Вихід:</span> <span class="highlight" id="iraExpense">0</span></div>
+            <div style="margin-top:5px; padding-top:5px; border-top:1px solid #2a2f38" class="stat-row">
+                <span>Бал:</span> <span style="color:#3b82f6" id="iraBalance">0</span>
+            </div>
+        </div>
+        <div class="card">
+            <div class="user-title">Міша</div>
+            <div class="stat-row"><span>Вхід:</span> <span class="highlight" id="mishaIncome">0</span></div>
+            <div class="stat-row"><span>Вихід:</span> <span class="highlight" id="mishaExpense">0</span></div>
+            <div style="margin-top:5px; padding-top:5px; border-top:1px solid #2a2f38" class="stat-row">
+                <span>Бал:</span> <span style="color:#3b82f6" id="mishaBalance">0</span>
+            </div>
+        </div>
+    </div>
 
-<div class="card" style="margin-bottom:15px;">
-Загальний дохід: <span id="totalIncome">0</span><br>
-Загальні витрати: <span id="totalExpense">0</span><br>
-Витрати від доходу: <span id="percentUsed">0%</span>
-</div>
+    <div class="switch">
+        <button id="iraBtn" onclick="window.setUser('Іра')" class="active">Іра</button>
+        <button id="mishaBtn" onclick="window.setUser('Міша')">Міша</button>
+    </div>
 
-<div class="switch">
-<button id="iraBtn" onclick="setUser('Іра')" class="active">Іра</button>
-<button id="mishaBtn" onclick="setUser('Міша')">Міша</button>
-</div>
+    <div class="switch">
+        <button id="incomeBtn" onclick="window.setType('income')" class="active">Дохід (+)</button>
+        <button id="expenseBtn" onclick="window.setType('expense')">Витрата (-)</button>
+    </div>
 
-<div class="switch">
-<button id="incomeBtn" onclick="setType('income')" class="active">Дохід</button>
-<button id="expenseBtn" onclick="setType('expense')">Витрата</button>
-</div>
+    <input type="text" inputmode="decimal" id="amount" placeholder="Сума (напр. 500)" onfocus="this.select()">
+    <input type="text" id="category" placeholder="Категорія (напр. Кава)">
 
-<input type="number" inputmode="decimal" id="amount" placeholder="Сума">
-<input type="text" id="category" placeholder="Категорія">
+    <button class="main" onclick="window.addOperation()" id="addBtn">Додати</button>
 
-<button class="main" onclick="addOperation()">Додати</button>
+    <div class="list-header">Історія операцій</div>
+    <div id="list"></div>
 
-<div id="list"></div>
-
-<div class="analytics">
-<strong>Аналітика по категоріях</strong>
-<div id="analyticsBox"></div>
-</div>
+    <div class="analytics">
+        <div class="list-header">Топ витрат за категоріями</div>
+        <div id="analyticsBox"></div>
+    </div>
 
 </div>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig={
-apiKey:"AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
-authDomain:"finance-eec75.firebaseapp.com",
-projectId:"finance-eec75",
-storageBucket:"finance-eec75.appspot.com",
-messagingSenderId:"386010317837",
-appId:"1:386010317837:web:88a24adc90b403e42a4144"
-};
+    // Конфігурація Firebase (Твої ключі)
+    const firebaseConfig = {
+        apiKey: "AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
+        authDomain: "finance-eec75.firebaseapp.com",
+        projectId: "finance-eec75",
+        storageBucket: "finance-eec75.appspot.com",
+        messagingSenderId: "386010317837",
+        appId: "1:386010317837:web:88a24adc90b403e42a4144"
+    };
 
-const allowed=[7255848995,921509542];
+    // Telegram ID (Додав перевірку, щоб працювало)
+    const allowed = [7255848995, 921509542]; 
+    
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Розгортаємо на весь екран
+    
+    const uid = tg.initDataUnsafe?.user?.id;
 
-const tg=window.Telegram.WebApp;
-tg.ready();
-const uid=tg.initDataUnsafe?.user?.id;
+    // Перевірка доступу (Простий варіант)
+    // Якщо відкриваємо без ТГ для тесту - можна закоментувати if/else
+    if (uid && !allowed.includes(uid)) {
+        document.getElementById("denied").style.display = "flex";
+    } else {
+        document.getElementById("app").style.display = "block";
+    }
 
-if(!allowed.includes(uid)){
-document.getElementById("denied").style.display="flex";
-}else{
-document.getElementById("app").style.display="block";
-}
+    // Ініціалізація
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const ref = collection(db, "operations");
 
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
-const ref=collection(db,"operations");
+    let currentUser = "Іра";
+    let currentType = "income";
 
-let currentUser="Іра";
-let currentType="income";
+    // --- Допоміжні функції ---
+    
+    // Форматування грошей (1000 -> 1 000)
+    function formatMoney(num) {
+        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    }
 
-window.hideKeyboard=function(e){
-const active=document.activeElement;
-if(active&&active.tagName==="INPUT"&&e.target.tagName!=="INPUT"){
-active.blur();
-}
-}
+    // --- Глобальні функції (прив'язка до window) ---
 
-window.setUser=function(u){
-currentUser=u;
-document.getElementById("iraBtn").classList.toggle("active",u==="Іра");
-document.getElementById("mishaBtn").classList.toggle("active",u==="Міша");
-}
+    window.setUser = function(u) {
+        currentUser = u;
+        document.getElementById("iraBtn").classList.toggle("active", u === "Іра");
+        document.getElementById("mishaBtn").classList.toggle("active", u === "Міша");
+        tg.HapticFeedback.impactOccurred('light');
+    }
 
-window.setType=function(t){
-currentType=t;
-document.getElementById("incomeBtn").classList.toggle("active",t==="income");
-document.getElementById("expenseBtn").classList.toggle("active",t==="expense");
-}
+    window.setType = function(t) {
+        currentType = t;
+        document.getElementById("incomeBtn").classList.toggle("active", t === "income");
+        document.getElementById("expenseBtn").classList.toggle("active", t === "expense");
+        
+        // Змінюємо колір кнопки "Додати" залежно від типу
+        const btn = document.getElementById("addBtn");
+        if(t === 'income') btn.style.background = '#22c55e';
+        else btn.style.background = '#ef4444';
+        
+        tg.HapticFeedback.impactOccurred('light');
+    }
 
-window.addOperation=async function(){
-const amount=parseFloat(document.getElementById("amount").value);
-const category=document.getElementById("category").value.trim();
-if(!amount||!category)return;
+    window.addOperation = async function() {
+        const btn = document.getElementById("addBtn");
+        const amountInput = document.getElementById("amount");
+        const catInput = document.getElementById("category");
 
-await addDoc(ref,{
-amount,category,type:currentType,author:currentUser,createdAt:new Date()
-});
+        // Заміна коми на крапку для дробних чисел
+        let val = amountInput.value.replace(',', '.');
+        const amount = parseFloat(val);
+        const category = catInput.value.trim();
 
-document.getElementById("amount").value="";
-document.getElementById("category").value="";
-}
+        if (!amount || !category) {
+            tg.HapticFeedback.notificationOccurred('error');
+            return;
+        }
 
-async function deleteOperation(id){
-await deleteDoc(doc(db,"operations",id));
-}
+        btn.disabled = true;
+        btn.innerText = "⏳";
 
-async function editOperation(id,oldAmount,oldCategory){
-const newAmount=prompt("Нова сума:",oldAmount);
-const newCategory=prompt("Нова категорія:",oldCategory);
-if(!newAmount||!newCategory)return;
+        try {
+            await addDoc(ref, {
+                amount,
+                category,
+                type: currentType,
+                author: currentUser,
+                createdAt: serverTimestamp() // Використовуємо серверний час
+            });
 
-await updateDoc(doc(db,"operations",id),{
-amount:parseFloat(newAmount),
-category:newCategory
-});
-}
+            amountInput.value = "";
+            catInput.value = "";
+            tg.HapticFeedback.notificationOccurred('success');
+        } catch (e) {
+            alert("Помилка: " + e.message);
+        }
 
-function render(snapshot){
-let iraIncome=0,iraExpense=0,mishaIncome=0,mishaExpense=0;
-let categoryTotals={};
-const list=document.getElementById("list");
-list.innerHTML="";
+        btn.disabled = false;
+        btn.innerText = "Додати";
+        amountInput.focus();
+    }
 
-snapshot.forEach(docSnap=>{
-const d=docSnap.data();
-const id=docSnap.id;
+    window.deleteOperation = async function(id) {
+        if(confirm("Видалити цей запис?")) {
+            await deleteDoc(doc(db, "operations", id));
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+    }
 
-if(d.author==="Іра"){
-if(d.type==="income")iraIncome+=d.amount;
-else iraExpense+=d.amount;
-}else{
-if(d.type==="income")mishaIncome+=d.amount;
-else mishaExpense+=d.amount;
-}
+    window.editOperation = async function(id, oldAmount, oldCategory) {
+        const newAmount = prompt("Нова сума:", oldAmount);
+        if (newAmount === null) return;
+        
+        const newCategory = prompt("Нова категорія:", oldCategory);
+        if (newCategory === null) return;
 
-categoryTotals[d.category]=(categoryTotals[d.category]||0)+d.amount;
+        let val = newAmount.replace(',', '.');
+        
+        await updateDoc(doc(db, "operations", id), {
+            amount: parseFloat(val),
+            category: newCategory
+        });
+        tg.HapticFeedback.notificationOccurred('success');
+    }
 
-const div=document.createElement("div");
-div.className="item";
-div.innerHTML=`
-<div>${d.category} (${d.author})</div>
-<div>
-<span class="${d.type}">
-${d.type==="income"?"+":"-"} ${d.amount}
-</span>
-<span class="actions">
-<span onclick="editOperation('${id}',${d.amount},'${d.category}')">✏️</span>
-<span onclick="deleteOperation('${id}')">🗑</span>
-</span>
-</div>`;
-list.appendChild(div);
-});
+    // --- Рендеринг (Малювання) ---
 
-const totalIncome=iraIncome+mishaIncome;
-const totalExpense=iraExpense+mishaExpense;
-const totalBalance=(iraIncome-iraExpense)+(mishaIncome-mishaExpense);
-const percent=totalIncome?((totalExpense/totalIncome)*100).toFixed(1):0;
+    function render(snapshot) {
+        let iraIncome = 0, iraExpense = 0;
+        let mishaIncome = 0, mishaExpense = 0;
+        let expenseCategories = {}; // Рахуємо тільки витрати по категоріях
 
-document.getElementById("iraIncome").innerText=iraIncome;
-document.getElementById("iraExpense").innerText=iraExpense;
-document.getElementById("iraBalance").innerText=iraIncome-iraExpense;
+        const list = document.getElementById("list");
+        list.innerHTML = "";
 
-document.getElementById("mishaIncome").innerText=mishaIncome;
-document.getElementById("mishaExpense").innerText=mishaExpense;
-document.getElementById("mishaBalance").innerText=mishaIncome-mishaExpense;
+        // Проходимо по документах
+        snapshot.forEach(docSnap => {
+            const d = docSnap.data();
+            const id = docSnap.id;
+            
+            // Захист від битих даних без суми
+            if(!d.amount) return;
 
-document.getElementById("totalIncome").innerText=totalIncome;
-document.getElementById("totalExpense").innerText=totalExpense;
-document.getElementById("totalBalance").innerText=totalBalance+" грн";
-document.getElementById("percentUsed").innerText=percent+"%";
+            // Підрахунок балансів
+            if (d.author === "Іра") {
+                if (d.type === "income") iraIncome += d.amount;
+                else iraExpense += d.amount;
+            } else {
+                if (d.type === "income") mishaIncome += d.amount;
+                else mishaExpense += d.amount;
+            }
 
-const analytics=document.getElementById("analyticsBox");
-analytics.innerHTML="";
-Object.entries(categoryTotals).forEach(([cat,sum])=>{
-const div=document.createElement("div");
-div.innerText=`${cat}: ${sum}`;
-analytics.appendChild(div);
-});
-}
+            // Збираємо категорії ТІЛЬКИ для витрат
+            if (d.type === "expense") {
+                expenseCategories[d.category] = (expenseCategories[d.category] || 0) + d.amount;
+            }
 
-onSnapshot(query(ref,orderBy("createdAt","desc")),render);
+            // Малюємо елемент списку
+            const div = document.createElement("div");
+            div.className = "item";
+            
+            const sign = d.type === "income" ? "+" : "-";
+            const colorClass = d.type === "income" ? "income-text" : "expense-text";
+            
+            div.innerHTML = `
+                <div>
+                    <div style="font-weight:600">${d.category}</div>
+                    <div class="meta">${d.author}</div>
+                </div>
+                <div style="text-align:right">
+                    <span class="${colorClass}">${sign} ${formatMoney(d.amount)}</span>
+                    <div class="actions">
+                        <span onclick="window.editOperation('${id}', ${d.amount}, '${d.category}')">✏️</span>
+                        <span onclick="window.deleteOperation('${id}')">🗑</span>
+                    </div>
+                </div>`;
+            
+            list.appendChild(div);
+        });
+
+        // Оновлюємо цифри на екрані
+        document.getElementById("iraIncome").innerText = formatMoney(iraIncome);
+        document.getElementById("iraExpense").innerText = formatMoney(iraExpense);
+        document.getElementById("iraBalance").innerText = formatMoney(iraIncome - iraExpense);
+
+        document.getElementById("mishaIncome").innerText = formatMoney(mishaIncome);
+        document.getElementById("mishaExpense").innerText = formatMoney(mishaExpense);
+        document.getElementById("mishaBalance").innerText = formatMoney(mishaIncome - mishaExpense);
+
+        const totalIncome = iraIncome + mishaIncome;
+        const totalExpense = iraExpense + mishaExpense;
+        const totalBalance = (iraIncome - iraExpense) + (mishaIncome - mishaExpense);
+        
+        // Відсоток витрат відносно доходу
+        const percent = totalIncome ? ((totalExpense / totalIncome) * 100).toFixed(1) : 0;
+
+        document.getElementById("totalBalance").innerText = formatMoney(totalBalance) + " ₴";
+        document.getElementById("percentUsed").innerText = percent + "%";
+
+        // Малюємо аналітику (Тільки витрати, сортуємо від найбільших)
+        const analyticsBox = document.getElementById("analyticsBox");
+        analyticsBox.innerHTML = "";
+        
+        const sortedCats = Object.entries(expenseCategories).sort((a, b) => b[1] - a[1]);
+        
+        if (sortedCats.length === 0) {
+            analyticsBox.innerHTML = "<div style='text-align:center; opacity:0.5; padding:10px'>Поки немає витрат</div>";
+        }
+
+        sortedCats.forEach(([cat, sum]) => {
+            const row = document.createElement("div");
+            row.className = "cat-row";
+            row.innerHTML = `<span>${cat}</span> <span style="color:#ef4444">-${formatMoney(sum)}</span>`;
+            analyticsBox.appendChild(row);
+        });
+    }
+
+    // Слухаємо зміни в базі в реальному часі
+    const q = query(ref, orderBy("createdAt", "desc"));
+    onSnapshot(q, render);
 
 </script>
 
