@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мій фінансовий облік</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f2f4f8;
+    padding: 15px;
+}
+h2 {
+    text-align: center;
+}
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+input, select, button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    font-weight: bold;
+}
+button:active {
+    transform: scale(0.98);
+}
+
+.balance {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.positive {
+    color: #16a34a;
+}
+
+.negative {
+    color: #dc2626;
+}
+
+.income {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+.expense {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.delete {
+    margin-left: 10px;
+    cursor: pointer;
+    color: gray;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>💸 Мій фінансовий облік</h2>
+
+<div class="card">
+    <select id="type">
+        <option value="income">➕ Дохід</option>
+        <option value="expense">➖ Витрата</option>
+    </select>
+
+    <input type="number" id="amount" placeholder="Сума">
+
+    <input type="text" id="category" placeholder="Категорія (їжа, продаж, авто...)">
+
+    <button onclick="add()">Додати запис</button>
+</div>
+
+<div class="card balance">
+    Баланс: <span id="balance">0</span> грн
+</div>
+
+<div class="card">
+    <h4>Історія</h4>
+    <div id="list"></div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("financeApp")) || [];
+
+function save() {
+    localStorage.setItem("financeApp", JSON.stringify(data));
+}
+
+function render() {
+    let list = document.getElementById("list");
+    let balanceEl = document.getElementById("balance");
+    list.innerHTML = "";
+    let balance = 0;
+
+    data.forEach((item, index) => {
+        if(item.type === "income") balance += item.amount;
+        else balance -= item.amount;
+
+        let div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+            <span>${item.category}</span>
+            <span class="${item.type}">
+                ${item.type === "income" ? "➕ +" : "➖ -"}${item.amount.toFixed(2)} грн
+                <span class="delete" onclick="remove(${index})">✕</span>
+            </span>
+        `;
+        list.appendChild(div);
+    });
+
+    balanceEl.innerText = balance.toFixed(2);
+    balanceEl.className = balance >= 0 ? "positive" : "negative";
+}
+
+function add() {
+    let type = document.getElementById("type").value;
+    let amount = parseFloat(document.getElementById("amount").value);
+    let category = document.getElementById("category").value;
+
+    if(!amount || !category) {
+        alert("Заповніть всі поля");
+        return;
+    }
+
+    data.push({
+        type: type,
+        amount: amount,
+        category: category,
+        date: new Date().toLocaleDateString()
+    });
+
+    save();
+    render();
+
+    document.getElementById("amount").value = "";
+    document.getElementById("category").value = "";
+}
+
+function remove(index) {
+    data.splice(index, 1);
+    save();
+    render();
+}
+
+render();
+</script>
+
+</body>
+</html>
