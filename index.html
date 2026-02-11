@@ -9,8 +9,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body{
+html,body{
 margin:0;
+padding:0;
 font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 background:#0e1116;
 color:#e5e7eb;
@@ -34,15 +35,16 @@ margin-bottom:20px;
 
 .balance{
 text-align:center;
-font-size:42px;
+font-size:40px;
 font-weight:700;
 margin-bottom:15px;
+transition:0.3s;
 }
 
 .userBalances{
 display:flex;
 gap:10px;
-margin-bottom:20px;
+margin-bottom:15px;
 }
 
 .userCard{
@@ -83,6 +85,8 @@ border:1px solid #2a2f38;
 background:#161b22;
 color:white;
 margin-bottom:10px;
+font-size:14px;
+outline:none;
 }
 
 button.main{
@@ -102,6 +106,13 @@ justify-content:space-between;
 padding:10px 0;
 border-bottom:1px solid #1f242c;
 font-size:13px;
+}
+
+.actions span{
+cursor:pointer;
+font-size:12px;
+margin-left:8px;
+opacity:0.6;
 }
 
 .chartBox{
@@ -131,9 +142,9 @@ font-size:18px;
 Доступ заборонено
 </div>
 
-<div class="app" id="app" style="display:none;">
+<div class="app" id="app" style="display:none;" onclick="hideKeyboard(event)">
 
-<div class="title">TEQRA • DUO ANALYTICS</div>
+<div class="title">TEQRA • DUO PREMIUM</div>
 
 <div class="balance" id="totalBalance">0 грн</div>
 
@@ -158,10 +169,10 @@ font-size:18px;
 <button id="expenseBtn" onclick="setType('expense')">Витрата</button>
 </div>
 
-<input type="number" id="amount" placeholder="Сума" inputmode="decimal">
+<input type="number" inputmode="decimal" id="amount" placeholder="Сума">
 <input type="text" id="category" placeholder="Категорія">
 
-<button class="main" onclick="addOperation()">Додати</button>
+<button class="main" onclick="addOrUpdate()">Додати</button>
 
 <div id="list"></div>
 
@@ -174,7 +185,7 @@ font-size:18px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
@@ -203,7 +214,15 @@ const operationsRef=collection(db,"operations");
 
 let currentUser="Іра";
 let currentType="income";
+let editId=null;
 let chart;
+
+window.hideKeyboard=function(e){
+const active=document.activeElement;
+if(active&&active.tagName==="INPUT"&&e.target.tagName!=="INPUT"){
+active.blur();
+}
+}
 
 window.setUser=function(user){
 currentUser=user;
@@ -217,20 +236,27 @@ document.getElementById("incomeBtn").classList.toggle("active",type==="income");
 document.getElementById("expenseBtn").classList.toggle("active",type==="expense");
 }
 
-window.addOperation=async function(){
+window.addOrUpdate=async function(){
 const amount=parseFloat(document.getElementById("amount").value);
 const category=document.getElementById("category").value;
 if(!amount||!category)return;
 
+if(editId){
+await updateDoc(doc(db,"operations",editId),{
+amount,category,type:currentType,author:currentUser
+});
+editId=null;
+}else{
 await addDoc(operationsRef,{
 amount,category,type:currentType,author:currentUser,createdAt:new Date()
 });
+}
 
 document.getElementById("amount").value="";
 document.getElementById("category").value="";
 }
 
-function animateNumber(el,start,end){
+function animate(el,start,end){
 let current=start;
 const step=(end-start)/20;
 const interval=setInterval(()=>{
@@ -250,7 +276,10 @@ let ira=0,misha=0,income=0,expense=0;
 
 snapshot.forEach(docSnap=>{
 const item=docSnap.data();
+const id=docSnap.id;
+
 if(item.type==="income"){income+=item.amount}else{expense+=item.amount}
+
 if(item.author==="Іра"){
 ira+=item.type==="income"?item.amount:-item.amount;
 }else{
@@ -260,21 +289,39 @@ misha+=item.type==="income"?item.amount:-item.amount;
 const div=document.createElement("div");
 div.className="item";
 div.innerHTML=`<div>${item.category} (${item.author})</div>
-<div class="${item.type}">
+<div>
+<span class="${item.type}">
 ${item.type==="income"?"+":"-"} ${item.amount}
+</span>
+<span class="actions">
+<span onclick="editOp('${id}','${item.type}','${item.author}',${item.amount},'${item.category}')">Ред.</span>
+<span onclick="deleteOp('${id}')">Вид.</span>
+</span>
 </div>`;
 list.appendChild(div);
 });
 
 const total=ira+misha;
 
-animateNumber(document.getElementById("iraBalance"),0,ira);
-animateNumber(document.getElementById("mishaBalance"),0,misha);
-animateNumber(document.getElementById("totalBalance"),0,total);
+animate(document.getElementById("iraBalance"),0,ira);
+animate(document.getElementById("mishaBalance"),0,misha);
+animate(document.getElementById("totalBalance"),0,total);
 
 document.getElementById("totalBalance").className="balance "+(total>=0?"positive":"negative");
 
 updateChart(income,expense);
+}
+
+window.deleteOp=async function(id){
+await deleteDoc(doc(db,"operations",id));
+}
+
+window.editOp=function(id,type,author,amount,category){
+editId=id;
+setUser(author);
+setType(type);
+document.getElementById("amount").value=amount;
+document.getElementById("category").value=category;
 }
 
 function updateChart(income,expense){
