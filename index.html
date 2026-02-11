@@ -2,214 +2,250 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-
-<meta name="viewport" 
-content="width=device-width, 
-initial-scale=1.0, 
-maximum-scale=1.0, 
-user-scalable=no">
-
-<title>Мій бюджет</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Budget X</title>
 
 <style>
-html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #0f172a;
+*{box-sizing:border-box}
+html,body{
+margin:0;
+padding:0;
+font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+background:#0a0f1f;
 }
-
-.wrapper {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.app{
+max-width:430px;
+margin:auto;
+min-height:100vh;
+padding:25px 20px;
+background:linear-gradient(145deg,#ffffff,#f1f5f9);
+border-radius:35px;
 }
-
-.app {
-    width: 100%;
-    max-width: 430px;
-    height: 100vh;
-    background: #ffffff;
-    border-radius: 30px;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow: hidden;
+.title{
+text-align:center;
+font-weight:600;
+font-size:20px;
+margin-bottom:25px;
 }
-
-.title {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 600;
+.balance{
+text-align:center;
+font-size:42px;
+font-weight:700;
+margin-bottom:25px;
 }
-
-.summary {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-    font-size: 15px;
-    font-weight: 600;
+.positive{color:#16a34a}
+.negative{color:#dc2626}
+.summary{
+display:flex;
+justify-content:space-between;
+margin-bottom:25px;
+font-weight:600;
 }
-
-.incomeTotal { color: #16a34a; }
-.expenseTotal { color: #dc2626; }
-
-.balance {
-    text-align: center;
-    font-size: 30px;
-    font-weight: 700;
-    margin: 15px 0;
+.summary div{
+width:48%;
+padding:14px;
+border-radius:20px;
+text-align:center;
+font-size:14px;
 }
-
-.positive { color: #16a34a; }
-.negative { color: #dc2626; }
-
-.row {
-    display: flex;
-    gap: 10px;
+.incomeBox{
+background:rgba(22,163,74,0.08);
+color:#16a34a;
 }
-
-input, select {
-    flex: 1;
-    padding: 12px;
-    border-radius: 14px;
-    border: 1px solid #e5e7eb;
-    font-size: 15px;
-    outline: none;
+.expenseBox{
+background:rgba(220,38,38,0.08);
+color:#dc2626;
 }
-
-button {
-    width: 100%;
-    margin-top: 10px;
-    padding: 14px;
-    border-radius: 18px;
-    border: none;
-    background: #0ea5e9;
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
+.row{display:flex;gap:10px}
+select,input{
+width:100%;
+padding:14px;
+border-radius:20px;
+border:none;
+background:#f1f5f9;
+font-size:15px;
+outline:none;
+margin-bottom:10px;
 }
-
-.history {
-    margin-top: 20px;
-    overflow-y: auto;
-    height: 40vh;
+button{
+width:100%;
+padding:15px;
+border-radius:20px;
+border:none;
+background:#111827;
+color:white;
+font-size:15px;
+font-weight:600;
+margin-top:8px;
 }
-
-.item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #f1f1f1;
-    font-size: 15px;
+.secondary{
+background:#64748b;
 }
-
-.income { color: #16a34a; font-weight: 600; }
-.expense { color: #dc2626; font-weight: 600; }
-
-.delete {
-    margin-left: 8px;
-    cursor: pointer;
-    color: #aaa;
+.history{
+margin-top:20px;
+}
+.item{
+display:flex;
+justify-content:space-between;
+padding:14px 0;
+border-bottom:1px solid #e5e7eb;
+font-size:15px;
+}
+.income{color:#16a34a;font-weight:600}
+.expense{color:#dc2626;font-weight:600}
+.delete{
+margin-left:10px;
+color:#999;
+cursor:pointer;
 }
 </style>
 </head>
-
 <body>
 
-<div class="wrapper">
 <div class="app">
 
-<div class="title">💸 Мій бюджет</div>
-
-<div class="summary">
-    <div class="incomeTotal">Доходи: <span id="incomeTotal">0</span> грн</div>
-    <div class="expenseTotal">Витрати: <span id="expenseTotal">0</span> грн</div>
-</div>
+<div class="title">BUDGET X</div>
 
 <div class="balance" id="balance">0 грн</div>
 
+<div class="summary">
+<div class="incomeBox">Доходи<br><span id="incomeTotal">0</span> грн</div>
+<div class="expenseBox">Витрати<br><span id="expenseTotal">0</span> грн</div>
+</div>
+
 <div class="row">
-    <select id="type">
-        <option value="income">➕</option>
-        <option value="expense">➖</option>
-    </select>
-    <input type="number" id="amount" placeholder="Сума">
+<select id="type">
+<option value="income">➕</option>
+<option value="expense">➖</option>
+</select>
+<input type="number" id="amount" placeholder="Сума">
 </div>
 
 <input type="text" id="category" placeholder="Категорія">
 
 <button onclick="add()">Додати</button>
+<button class="secondary" onclick="exportData()">📤 Експорт</button>
+<button class="secondary" onclick="document.getElementById('importFile').click()">📥 Імпорт</button>
+
+<input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
 
 <div class="history" id="list"></div>
 
 </div>
-</div>
 
 <script>
+
+let PASSWORD = "1234"; // Можешь изменить пароль
 let data = JSON.parse(localStorage.getItem("financeApp")) || [];
 
-function save() {
-    localStorage.setItem("financeApp", JSON.stringify(data));
+function save(){
+localStorage.setItem("financeApp",JSON.stringify(data));
 }
 
-function render() {
-    let incomeTotal = 0;
-    let expenseTotal = 0;
-    let list = document.getElementById("list");
-    list.innerHTML = "";
+function render(){
+let incomeTotal=0;
+let expenseTotal=0;
+let list=document.getElementById("list");
+list.innerHTML="";
 
-    data.forEach((item, index) => {
-        if(item.type === "income") incomeTotal += item.amount;
-        else expenseTotal += item.amount;
+data.forEach((item,index)=>{
+if(item.type==="income") incomeTotal+=item.amount;
+else expenseTotal+=item.amount;
 
-        let div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-            <span>${item.category}</span>
-            <span class="${item.type}">
-                ${item.type === "income" ? "+ " : "- "}${item.amount.toFixed(2)} грн
-                <span class="delete" onclick="remove(${index})">✕</span>
-            </span>
-        `;
-        list.appendChild(div);
-    });
+let div=document.createElement("div");
+div.className="item";
+div.innerHTML=`
+<span>${item.category}</span>
+<span class="${item.type}">
+${item.type==="income"?"+ ":"- "}${item.amount.toFixed(2)} грн
+<span class="delete" onclick="remove(${index})">✕</span>
+</span>
+`;
+list.appendChild(div);
+});
 
-    let balance = incomeTotal - expenseTotal;
+let balance=incomeTotal-expenseTotal;
 
-    document.getElementById("incomeTotal").innerText = incomeTotal.toFixed(2);
-    document.getElementById("expenseTotal").innerText = expenseTotal.toFixed(2);
+document.getElementById("incomeTotal").innerText=incomeTotal.toFixed(2);
+document.getElementById("expenseTotal").innerText=expenseTotal.toFixed(2);
 
-    let balanceEl = document.getElementById("balance");
-    balanceEl.innerText = balance.toFixed(2) + " грн";
-    balanceEl.className = "balance " + (balance >= 0 ? "positive" : "negative");
+let balanceEl=document.getElementById("balance");
+balanceEl.innerText=balance.toFixed(2)+" грн";
+balanceEl.className="balance "+(balance>=0?"positive":"negative");
 }
 
-function add() {
-    let type = document.getElementById("type").value;
-    let amount = parseFloat(document.getElementById("amount").value);
-    let category = document.getElementById("category").value;
+function add(){
+let type=document.getElementById("type").value;
+let amount=parseFloat(document.getElementById("amount").value);
+let category=document.getElementById("category").value;
 
-    if(!amount || !category) return;
+if(!amount||!category)return;
 
-    data.unshift({ type, amount, category });
+data.unshift({type,amount,category,date:new Date()});
+save();
+render();
 
-    save();
-    render();
-
-    document.getElementById("amount").value = "";
-    document.getElementById("category").value = "";
+document.getElementById("amount").value="";
+document.getElementById("category").value="";
 }
 
-function remove(index) {
-    data.splice(index, 1);
-    save();
-    render();
+function remove(index){
+data.splice(index,1);
+save();
+render();
+}
+
+function exportData(){
+if(data.length===0){alert("Немає даних");return;}
+
+let protectedData={
+password:PASSWORD,
+payload:data
+};
+
+const blob=new Blob([JSON.stringify(protectedData,null,2)],{type:"application/json"});
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;
+a.download="budget-backup.json";
+a.click();
+URL.revokeObjectURL(url);
+}
+
+function importData(event){
+const file=event.target.files[0];
+if(!file)return;
+
+const reader=new FileReader();
+reader.onload=function(e){
+try{
+const imported=JSON.parse(e.target.result);
+
+if(imported.password!==PASSWORD){
+alert("Невірний пароль!");
+return;
+}
+
+if(!Array.isArray(imported.payload)){
+alert("Невірний файл");
+return;
+}
+
+// объединение данных
+data=[...imported.payload,...data];
+
+save();
+render();
+alert("Дані успішно імпортовано!");
+}catch{
+alert("Помилка імпорту");
+}
+};
+reader.readAsText(file);
 }
 
 render();
-</script>
 
+</script>
 </body>
 </html>
