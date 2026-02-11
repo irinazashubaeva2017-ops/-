@@ -35,7 +35,7 @@ margin-bottom:15px;
 
 .balance{
 text-align:center;
-font-size:36px;
+font-size:34px;
 font-weight:700;
 margin-bottom:15px;
 }
@@ -143,7 +143,7 @@ font-size:18px;
 
 <div class="app" id="app" style="display:none;" onclick="hideKeyboard(event)">
 
-<div class="title">TEQRA • DUO STABLE</div>
+<div class="title">TEQRA • DUO ANALYTICS</div>
 
 <div class="balance" id="totalBalance">0 грн</div>
 
@@ -186,8 +186,16 @@ font-size:18px;
 <div id="list"></div>
 
 <div class="chartBox">
+
+<div class="switch" style="margin-bottom:10px;">
+<button id="expenseChartBtn" class="active" onclick="setChartType('expense')">Витрати</button>
+<button id="incomeChartBtn" onclick="setChartType('income')">Доходи</button>
+</div>
+
 <canvas id="financeChart"></canvas>
+
 <div id="analytics" style="margin-top:10px;font-size:12px;opacity:0.8;"></div>
+
 </div>
 
 </div>
@@ -223,6 +231,8 @@ let currentUser="Іра";
 let currentType="income";
 let editId=null;
 let chart;
+let chartType="expense";
+let lastSnapshot=null;
 
 window.hideKeyboard=function(e){
 const active=document.activeElement;
@@ -241,6 +251,13 @@ window.setType=function(t){
 currentType=t;
 document.getElementById("incomeBtn").classList.toggle("active",t==="income");
 document.getElementById("expenseBtn").classList.toggle("active",t==="expense");
+}
+
+window.setChartType=function(type){
+chartType=type;
+document.getElementById("expenseChartBtn").classList.toggle("active",type==="expense");
+document.getElementById("incomeChartBtn").classList.toggle("active",type==="income");
+if(lastSnapshot) render(lastSnapshot);
 }
 
 window.saveOperation=async function(){
@@ -263,11 +280,24 @@ document.getElementById("amount").value="";
 document.getElementById("category").value="";
 }
 
+window.deleteOp=async function(id){
+await deleteDoc(doc(db,"operations",id));
+}
+
+window.editOp=function(id,type,author,amount,category){
+editId=id;
+setUser(author);
+setType(type);
+document.getElementById("amount").value=amount;
+document.getElementById("category").value=category;
+}
+
 function render(snapshot){
 
+lastSnapshot=snapshot;
+
 let iraIncome=0,iraExpense=0,mishaIncome=0,mishaExpense=0;
-let expenseCategories={};
-let incomeCategories={};
+let expenseCategories={}, incomeCategories={};
 
 const list=document.getElementById("list");
 list.innerHTML="";
@@ -305,7 +335,6 @@ ${d.type==="income"?"+":"-"} ${d.amount}
 </span>
 </div>`;
 list.appendChild(div);
-
 });
 
 const totalIncome=iraIncome+mishaIncome;
@@ -327,26 +356,17 @@ document.getElementById("totalIncome").innerText=totalIncome;
 document.getElementById("totalExpense").innerText=totalExpense;
 document.getElementById("totalBalance").innerText=totalBalance+" грн";
 
-const percent = totalIncome?((totalExpense/totalIncome)*100).toFixed(1):0;
+const percent=totalIncome?((totalExpense/totalIncome)*100).toFixed(1):0;
 document.getElementById("percentUsed").innerText=percent+"%";
 
-updateChart(expenseCategories,totalExpense);
+updateChart(expenseCategories,incomeCategories,totalExpense,totalIncome);
 updateAnalytics(expenseCategories,incomeCategories,totalExpense,totalIncome);
 }
 
-window.deleteOp=async function(id){
-await deleteDoc(doc(db,"operations",id));
-}
+function updateChart(expenseCategories,incomeCategories,totalExpense,totalIncome){
 
-window.editOp=function(id,type,author,amount,category){
-editId=id;
-setUser(author);
-setType(type);
-document.getElementById("amount").value=amount;
-document.getElementById("category").value=category;
-}
-
-function updateChart(categories,total){
+const categories = chartType==="expense" ? expenseCategories : incomeCategories;
+const total = chartType==="expense" ? totalExpense : totalIncome;
 
 const ctx=document.getElementById("financeChart").getContext("2d");
 if(chart)chart.destroy();
