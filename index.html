@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TEQRA Finance Duo</title>
+<title>TEQRA DUO</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -30,30 +30,29 @@ text-align:center;
 font-size:14px;
 letter-spacing:3px;
 opacity:0.5;
-margin-bottom:20px;
+margin-bottom:15px;
 }
 
 .balance{
 text-align:center;
-font-size:40px;
+font-size:38px;
 font-weight:700;
 margin-bottom:15px;
-transition:0.3s;
 }
 
-.userBalances{
+.cardRow{
 display:flex;
 gap:10px;
-margin-bottom:15px;
+margin-bottom:10px;
 }
 
-.userCard{
+.card{
 flex:1;
 background:#161b22;
 border:1px solid #22262e;
 border-radius:14px;
-padding:12px;
-font-size:13px;
+padding:10px;
+font-size:12px;
 }
 
 .switch{
@@ -85,8 +84,6 @@ border:1px solid #2a2f38;
 background:#161b22;
 color:white;
 margin-bottom:10px;
-font-size:14px;
-outline:none;
 }
 
 button.main{
@@ -97,34 +94,27 @@ border:none;
 background:#3b82f6;
 color:white;
 font-weight:600;
-margin-bottom:20px;
+margin-bottom:15px;
 }
 
 .item{
 display:flex;
 justify-content:space-between;
-padding:10px 0;
+padding:8px 0;
 border-bottom:1px solid #1f242c;
-font-size:13px;
+font-size:12px;
 }
 
-.actions span{
-cursor:pointer;
-font-size:12px;
-margin-left:8px;
-opacity:0.6;
-}
+.income{color:#22c55e}
+.expense{color:#ef4444}
 
 .chartBox{
-margin-top:20px;
+margin-top:15px;
 background:#161b22;
 border:1px solid #22262e;
 border-radius:14px;
-padding:12px;
+padding:10px;
 }
-
-.positive{color:#22c55e}
-.negative{color:#ef4444}
 
 .denied{
 display:flex;
@@ -144,19 +134,29 @@ font-size:18px;
 
 <div class="app" id="app" style="display:none;" onclick="hideKeyboard(event)">
 
-<div class="title">TEQRA • DUO PREMIUM</div>
+<div class="title">TEQRA • DUO ANALYTICS</div>
 
 <div class="balance" id="totalBalance">0 грн</div>
 
-<div class="userBalances">
-<div class="userCard">
+<div class="cardRow">
+<div class="card">
 <strong>Іра</strong><br>
-<span id="iraBalance">0</span>
+Дохід: <span id="iraIncome">0</span><br>
+Витрати: <span id="iraExpense">0</span><br>
+Баланс: <span id="iraBalance">0</span>
 </div>
-<div class="userCard">
+<div class="card">
 <strong>Міша</strong><br>
-<span id="mishaBalance">0</span>
+Дохід: <span id="mishaIncome">0</span><br>
+Витрати: <span id="mishaExpense">0</span><br>
+Баланс: <span id="mishaBalance">0</span>
 </div>
+</div>
+
+<div class="card" style="margin-bottom:15px;">
+Загальний дохід: <span id="totalIncome">0</span><br>
+Загальні витрати: <span id="totalExpense">0</span><br>
+Витрати від доходу: <span id="percentUsed">0%</span>
 </div>
 
 <div class="switch">
@@ -172,7 +172,7 @@ font-size:18px;
 <input type="number" inputmode="decimal" id="amount" placeholder="Сума">
 <input type="text" id="category" placeholder="Категорія">
 
-<button class="main" onclick="addOrUpdate()">Додати</button>
+<button class="main" onclick="addOperation()">Додати</button>
 
 <div id="list"></div>
 
@@ -185,24 +185,24 @@ font-size:18px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
-  authDomain: "finance-eec75.firebaseapp.com",
-  projectId: "finance-eec75",
-  storageBucket: "finance-eec75.appspot.com",
-  messagingSenderId: "386010317837",
-  appId: "1:386010317837:web:88a24adc90b403e42a4144"
+const firebaseConfig={
+apiKey:"AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
+authDomain:"finance-eec75.firebaseapp.com",
+projectId:"finance-eec75",
+storageBucket:"finance-eec75.appspot.com",
+messagingSenderId:"386010317837",
+appId:"1:386010317837:web:88a24adc90b403e42a4144"
 };
 
-const allowedIds=[7255848995,921509542];
+const allowed=[7255848995,921509542];
 
 const tg=window.Telegram.WebApp;
 tg.ready();
-const userId=tg.initDataUnsafe?.user?.id;
+const uid=tg.initDataUnsafe?.user?.id;
 
-if(!allowedIds.includes(userId)){
+if(!allowed.includes(uid)){
 document.getElementById("denied").style.display="flex";
 }else{
 document.getElementById("app").style.display="block";
@@ -210,11 +210,10 @@ document.getElementById("app").style.display="block";
 
 const app=initializeApp(firebaseConfig);
 const db=getFirestore(app);
-const operationsRef=collection(db,"operations");
+const ref=collection(db,"operations");
 
 let currentUser="Іра";
 let currentType="income";
-let editId=null;
 let chart;
 
 window.hideKeyboard=function(e){
@@ -224,104 +223,76 @@ active.blur();
 }
 }
 
-window.setUser=function(user){
-currentUser=user;
-document.getElementById("iraBtn").classList.toggle("active",user==="Іра");
-document.getElementById("mishaBtn").classList.toggle("active",user==="Міша");
+window.setUser=function(u){
+currentUser=u;
+document.getElementById("iraBtn").classList.toggle("active",u==="Іра");
+document.getElementById("mishaBtn").classList.toggle("active",u==="Міша");
 }
 
-window.setType=function(type){
-currentType=type;
-document.getElementById("incomeBtn").classList.toggle("active",type==="income");
-document.getElementById("expenseBtn").classList.toggle("active",type==="expense");
+window.setType=function(t){
+currentType=t;
+document.getElementById("incomeBtn").classList.toggle("active",t==="income");
+document.getElementById("expenseBtn").classList.toggle("active",t==="expense");
 }
 
-window.addOrUpdate=async function(){
+window.addOperation=async function(){
 const amount=parseFloat(document.getElementById("amount").value);
 const category=document.getElementById("category").value;
 if(!amount||!category)return;
 
-if(editId){
-await updateDoc(doc(db,"operations",editId),{
-amount,category,type:currentType,author:currentUser
-});
-editId=null;
-}else{
-await addDoc(operationsRef,{
+await addDoc(ref,{
 amount,category,type:currentType,author:currentUser,createdAt:new Date()
 });
-}
 
 document.getElementById("amount").value="";
 document.getElementById("category").value="";
 }
 
-function animate(el,start,end){
-let current=start;
-const step=(end-start)/20;
-const interval=setInterval(()=>{
-current+=step;
-el.innerText=Math.round(current);
-if((step>0&&current>=end)||(step<0&&current<=end)){
-el.innerText=end;
-clearInterval(interval);
-}
-},15);
-}
-
 function render(snapshot){
+let iraIncome=0,iraExpense=0,mishaIncome=0,mishaExpense=0;
 const list=document.getElementById("list");
 list.innerHTML="";
-let ira=0,misha=0,income=0,expense=0;
 
 snapshot.forEach(docSnap=>{
-const item=docSnap.data();
-const id=docSnap.id;
-
-if(item.type==="income"){income+=item.amount}else{expense+=item.amount}
-
-if(item.author==="Іра"){
-ira+=item.type==="income"?item.amount:-item.amount;
+const d=docSnap.data();
+if(d.author==="Іра"){
+if(d.type==="income")iraIncome+=d.amount;
+else iraExpense+=d.amount;
 }else{
-misha+=item.type==="income"?item.amount:-item.amount;
+if(d.type==="income")mishaIncome+=d.amount;
+else mishaExpense+=d.amount;
 }
 
 const div=document.createElement("div");
 div.className="item";
-div.innerHTML=`<div>${item.category} (${item.author})</div>
-<div>
-<span class="${item.type}">
-${item.type==="income"?"+":"-"} ${item.amount}
-</span>
-<span class="actions">
-<span onclick="editOp('${id}','${item.type}','${item.author}',${item.amount},'${item.category}')">Ред.</span>
-<span onclick="deleteOp('${id}')">Вид.</span>
-</span>
+div.innerHTML=`<div>${d.category} (${d.author})</div>
+<div class="${d.type}">
+${d.type==="income"?"+":"-"} ${d.amount}
 </div>`;
 list.appendChild(div);
 });
 
-const total=ira+misha;
+const iraBalance=iraIncome-iraExpense;
+const mishaBalance=mishaIncome-mishaExpense;
+const totalIncome=iraIncome+mishaIncome;
+const totalExpense=iraExpense+mishaExpense;
+const totalBalance=iraBalance+mishaBalance;
+const percent=totalIncome?((totalExpense/totalIncome)*100).toFixed(1):0;
 
-animate(document.getElementById("iraBalance"),0,ira);
-animate(document.getElementById("mishaBalance"),0,misha);
-animate(document.getElementById("totalBalance"),0,total);
+document.getElementById("iraIncome").innerText=iraIncome;
+document.getElementById("iraExpense").innerText=iraExpense;
+document.getElementById("iraBalance").innerText=iraBalance;
 
-document.getElementById("totalBalance").className="balance "+(total>=0?"positive":"negative");
+document.getElementById("mishaIncome").innerText=mishaIncome;
+document.getElementById("mishaExpense").innerText=mishaExpense;
+document.getElementById("mishaBalance").innerText=mishaBalance;
 
-updateChart(income,expense);
-}
+document.getElementById("totalIncome").innerText=totalIncome;
+document.getElementById("totalExpense").innerText=totalExpense;
+document.getElementById("totalBalance").innerText=totalBalance+" грн";
+document.getElementById("percentUsed").innerText=percent+"%";
 
-window.deleteOp=async function(id){
-await deleteDoc(doc(db,"operations",id));
-}
-
-window.editOp=function(id,type,author,amount,category){
-editId=id;
-setUser(author);
-setType(type);
-document.getElementById("amount").value=amount;
-document.getElementById("category").value=category;
+updateChart(totalIncome,totalExpense);
 }
 
 function updateChart(income,expense){
@@ -336,12 +307,11 @@ data:[income,expense],
 backgroundColor:["#22c55e","#ef4444"],
 borderWidth:0
 }]
-},
-options:{plugins:{legend:{labels:{color:"#e5e7eb"}}}}
+}
 });
 }
 
-onSnapshot(query(operationsRef,orderBy("createdAt","desc")),render);
+onSnapshot(query(ref,orderBy("createdAt","desc")),render);
 
 </script>
 
