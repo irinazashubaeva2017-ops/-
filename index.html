@@ -6,233 +6,144 @@
 <title>TEQRA DUO</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
 
 <style>
-html,body{
+body{
 margin:0;
-padding:0;
 font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-background:#0e1116;
-color:#e5e7eb;
-touch-action:manipulation;
+background:linear-gradient(145deg,#0f172a,#111827);
+color:white;
 }
 
-.app{
-max-width:430px;
+.wrapper{
+max-width:480px;
 margin:auto;
-padding:25px;
-min-height:100vh;
+padding:20px;
 }
 
 .title{
 text-align:center;
-font-size:14px;
 letter-spacing:3px;
-opacity:0.5;
-margin-bottom:15px;
+opacity:.5;
+margin-bottom:10px;
 }
 
 .balance{
 text-align:center;
-font-size:34px;
+font-size:42px;
 font-weight:700;
-margin-bottom:15px;
-}
-
-.cardRow{
-display:flex;
-gap:10px;
-margin-bottom:10px;
+margin-bottom:20px;
 }
 
 .card{
-flex:1;
-background:#161b22;
-border:1px solid #22262e;
-border-radius:14px;
-padding:10px;
-font-size:12px;
+background:#1e293b;
+padding:15px;
+border-radius:16px;
+margin-bottom:12px;
 }
 
-.switch{
+.row{
 display:flex;
-gap:10px;
-margin-bottom:10px;
-}
-
-.switch button{
-flex:1;
-padding:10px;
-border-radius:12px;
-border:1px solid #2a2f38;
-background:#161b22;
-color:#9ca3af;
-cursor:pointer;
-}
-
-.active{
-background:#1f2937 !important;
-color:white !important;
-border-color:#3b82f6 !important;
+justify-content:space-between;
+margin:6px 0;
+font-size:14px;
 }
 
 input{
 width:100%;
-padding:12px;
-border-radius:12px;
-border:1px solid #2a2f38;
-background:#161b22;
-color:white;
+padding:14px;
 margin-bottom:10px;
-outline:none;
-}
-
-button.main{
-width:100%;
-padding:12px;
 border-radius:14px;
 border:none;
+background:#111827;
+color:white;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:14px;
+border:none;
+border-radius:16px;
 background:#3b82f6;
 color:white;
 font-weight:600;
 margin-bottom:15px;
-cursor:pointer;
 }
 
-.item{
+.listItem{
 display:flex;
 justify-content:space-between;
 padding:8px 0;
-border-bottom:1px solid #1f242c;
-font-size:12px;
+border-bottom:1px solid rgba(255,255,255,0.05);
+font-size:13px;
 }
 
-.actions span{
-cursor:pointer;
-margin-left:8px;
-opacity:0.6;
-}
+.green{color:#22c55e;}
+.red{color:#ef4444;}
 
-.income{color:#22c55e}
-.expense{color:#ef4444}
-
-.chartBox{
-margin-top:15px;
-background:#161b22;
-border:1px solid #22262e;
-border-radius:14px;
-padding:10px;
-}
-
-.denied{
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-font-size:18px;
+.analysis{
+background:#111827;
+padding:12px;
+border-radius:16px;
+font-size:13px;
+line-height:1.5;
 }
 </style>
 </head>
 
-<body>
+<body onclick="hideKeyboard(event)">
+<div class="wrapper">
 
-<div id="denied" class="denied" style="display:none;">
-Доступ заборонено
-</div>
+<div class="title">TEQRA • DUO</div>
 
-<div class="app" id="app" style="display:none;" onclick="hideKeyboard(event)">
+<div class="balance" id="balance">0 грн</div>
 
-<div class="title">TEQRA • DUO ANALYTICS</div>
+<div class="card" id="stats"></div>
 
-<div class="balance" id="totalBalance">0 грн</div>
+<input id="amount" type="number" inputmode="numeric" placeholder="Сума">
+<input id="category" type="text" placeholder="Категорія">
 
-<div class="cardRow">
-<div class="card">
-<strong>Іра</strong><br>
-Дохід: <span id="iraIncome">0</span><br>
-Витрати: <span id="iraExpense">0</span><br>
-Баланс: <span id="iraBalance">0</span>
-</div>
-<div class="card">
-<strong>Міша</strong><br>
-Дохід: <span id="mishaIncome">0</span><br>
-Витрати: <span id="mishaExpense">0</span><br>
-Баланс: <span id="mishaBalance">0</span>
-</div>
-</div>
+<select id="type" style="width:100%;padding:12px;border-radius:12px;background:#111827;color:white;margin-bottom:10px;">
+<option value="income">Дохід</option>
+<option value="expense">Витрата</option>
+</select>
 
-<div class="card" style="margin-bottom:15px;">
-Загальний дохід: <span id="totalIncome">0</span><br>
-Загальні витрати: <span id="totalExpense">0</span><br>
-Витрати від доходу: <span id="percentUsed">0%</span>
-</div>
+<select id="person" style="width:100%;padding:12px;border-radius:12px;background:#111827;color:white;margin-bottom:10px;">
+<option value="ira">Іра</option>
+<option value="misha">Міша</option>
+</select>
 
-<div class="switch">
-<button id="iraBtn" onclick="setUser('Іра')" class="active">Іра</button>
-<button id="mishaBtn" onclick="setUser('Міша')">Міша</button>
-</div>
+<button onclick="addTransaction()">Додати</button>
 
-<div class="switch">
-<button id="incomeBtn" onclick="setType('income')" class="active">Дохід</button>
-<button id="expenseBtn" onclick="setType('expense')">Витрата</button>
-</div>
+<div id="transactions"></div>
 
-<input type="number" inputmode="decimal" id="amount" placeholder="Сума">
-<input type="text" id="category" placeholder="Категорія">
-
-<button class="main" onclick="saveOperation()">Додати</button>
-
-<div id="list"></div>
-
-<div class="chartBox">
-
-<div class="switch" style="margin-bottom:10px;">
-<button id="expenseChartBtn" class="active" onclick="setChartType('expense')">Витрати</button>
-<button id="incomeChartBtn" onclick="setChartType('income')">Доходи</button>
-</div>
-
-<canvas id="financeChart"></canvas>
-
-<div id="analytics" style="margin-top:10px;font-size:12px;opacity:0.8;"></div>
-
-</div>
+<div class="analysis" id="analysis"></div>
 
 </div>
 
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig={
+const firebaseConfig = {
 apiKey:"AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
 authDomain:"finance-eec75.firebaseapp.com",
 projectId:"finance-eec75"
 };
 
-const allowed=[7255848995,921509542];
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-const tg=window.Telegram.WebApp;
-tg.ready();
-const uid=tg.initDataUnsafe?.user?.id;
+const allowed=["7255848995","921509542"];
+const uid = Telegram.WebApp.initDataUnsafe.user?.id?.toString();
 
 if(!allowed.includes(uid)){
-document.getElementById("denied").style.display="flex";
-}else{
-document.getElementById("app").style.display="block";
+document.body.innerHTML="<h2 style='text-align:center;margin-top:40%'>Доступ заборонено</h2>";
 }
-
-const app=initializeApp(firebaseConfig);
-const db=getFirestore(app);
-const ref=collection(db,"operations");
-
-let currentUser="Іра";
-let currentType="income";
-let editId=null;
-let chart;
-let chartType="expense";
-let lastSnapshot=null;
 
 window.hideKeyboard=function(e){
 const active=document.activeElement;
@@ -241,193 +152,96 @@ active.blur();
 }
 }
 
-window.setUser=function(u){
-currentUser=u;
-document.getElementById("iraBtn").classList.toggle("active",u==="Іра");
-document.getElementById("mishaBtn").classList.toggle("active",u==="Міша");
-}
-
-window.setType=function(t){
-currentType=t;
-document.getElementById("incomeBtn").classList.toggle("active",t==="income");
-document.getElementById("expenseBtn").classList.toggle("active",t==="expense");
-}
-
-window.setChartType=function(type){
-chartType=type;
-document.getElementById("expenseChartBtn").classList.toggle("active",type==="expense");
-document.getElementById("incomeChartBtn").classList.toggle("active",type==="income");
-if(lastSnapshot) render(lastSnapshot);
-}
-
-window.saveOperation=async function(){
+window.addTransaction=async function(){
 const amount=parseFloat(document.getElementById("amount").value);
 const category=document.getElementById("category").value;
+const type=document.getElementById("type").value;
+const person=document.getElementById("person").value;
+
 if(!amount||!category)return;
 
-if(editId){
-await updateDoc(doc(db,"operations",editId),{
-amount,category,type:currentType,author:currentUser
+await addDoc(collection(db,"transactions"),{
+amount,type,category,person,date:new Date()
 });
-editId=null;
-}else{
-await addDoc(ref,{
-amount,category,type:currentType,author:currentUser,createdAt:new Date()
-});
-}
 
 document.getElementById("amount").value="";
 document.getElementById("category").value="";
 }
 
-window.deleteOp=async function(id){
-await deleteDoc(doc(db,"operations",id));
-}
+onSnapshot(collection(db,"transactions"),snap=>{
 
-window.editOp=function(id,type,author,amount,category){
-editId=id;
-setUser(author);
-setType(type);
-document.getElementById("amount").value=amount;
-document.getElementById("category").value=category;
-}
+let totalIncome=0,totalExpense=0;
+let ira={income:0,expense:0};
+let misha={income:0,expense:0};
+let expenseCategories={},incomeCategories={};
+let html="";
 
-function render(snapshot){
-
-lastSnapshot=snapshot;
-
-let iraIncome=0,iraExpense=0,mishaIncome=0,mishaExpense=0;
-let expenseCategories={}, incomeCategories={};
-
-const list=document.getElementById("list");
-list.innerHTML="";
-
-snapshot.forEach(docSnap=>{
-const d=docSnap.data();
-const id=docSnap.id;
+snap.forEach(doc=>{
+const d=doc.data();
+const sign=d.type==="income"?"+":"-";
+const color=d.type==="income"?"green":"red";
 
 if(d.type==="income"){
-if(d.author==="Іра") iraIncome+=d.amount;
-else mishaIncome+=d.amount;
-
-if(!incomeCategories[d.category]) incomeCategories[d.category]=0;
-incomeCategories[d.category]+=d.amount;
-
+totalIncome+=d.amount;
+incomeCategories[d.category]=(incomeCategories[d.category]||0)+d.amount;
 }else{
-if(d.author==="Іра") iraExpense+=d.amount;
-else mishaExpense+=d.amount;
-
-if(!expenseCategories[d.category]) expenseCategories[d.category]=0;
-expenseCategories[d.category]+=d.amount;
+totalExpense+=d.amount;
+expenseCategories[d.category]=(expenseCategories[d.category]||0)+d.amount;
 }
 
-const div=document.createElement("div");
-div.className="item";
-div.innerHTML=`
-<div>${d.category} (${d.author})</div>
-<div>
-<span class="${d.type}">
-${d.type==="income"?"+":"-"} ${d.amount}
-</span>
-<span class="actions">
-<span onclick="editOp('${id}','${d.type}','${d.author}',${d.amount},'${d.category}')">✏</span>
-<span onclick="deleteOp('${id}')">🗑</span>
-</span>
+if(d.person==="ira"){
+if(d.type==="income")ira.income+=d.amount;
+else ira.expense+=d.amount;
+}else{
+if(d.type==="income")misha.income+=d.amount;
+else misha.expense+=d.amount;
+}
+
+html+=`
+<div class="listItem">
+<span>${d.category} (${d.person})</span>
+<span class="${color}">${sign}${d.amount}</span>
 </div>`;
-list.appendChild(div);
 });
 
-const totalIncome=iraIncome+mishaIncome;
-const totalExpense=iraExpense+mishaExpense;
+document.getElementById("transactions").innerHTML=html;
+document.getElementById("balance").innerText=(totalIncome-totalExpense)+" грн";
 
-const iraBalance=iraIncome-iraExpense;
-const mishaBalance=mishaIncome-mishaExpense;
-const totalBalance=iraBalance+mishaBalance;
-
-document.getElementById("iraIncome").innerText=iraIncome;
-document.getElementById("iraExpense").innerText=iraExpense;
-document.getElementById("iraBalance").innerText=iraBalance;
-
-document.getElementById("mishaIncome").innerText=mishaIncome;
-document.getElementById("mishaExpense").innerText=mishaExpense;
-document.getElementById("mishaBalance").innerText=mishaBalance;
-
-document.getElementById("totalIncome").innerText=totalIncome;
-document.getElementById("totalExpense").innerText=totalExpense;
-document.getElementById("totalBalance").innerText=totalBalance+" грн";
-
-const percent=totalIncome?((totalExpense/totalIncome)*100).toFixed(1):0;
-document.getElementById("percentUsed").innerText=percent+"%";
-
-updateChart(expenseCategories,incomeCategories,totalExpense,totalIncome);
-updateAnalytics(expenseCategories,incomeCategories,totalExpense,totalIncome);
-}
-
-function updateChart(expenseCategories,incomeCategories,totalExpense,totalIncome){
-
-const categories = chartType==="expense" ? expenseCategories : incomeCategories;
-const total = chartType==="expense" ? totalExpense : totalIncome;
-
-const ctx=document.getElementById("financeChart").getContext("2d");
-if(chart)chart.destroy();
-
-chart=new Chart(ctx,{
-type:"doughnut",
-data:{
-labels:Object.keys(categories),
-datasets:[{
-data:Object.values(categories),
-backgroundColor:["#ef4444","#f97316","#eab308","#3b82f6","#8b5cf6","#14b8a6"],
-borderWidth:0
-}]
-},
-options:{
-plugins:{
-tooltip:{
-callbacks:{
-label:function(context){
-let value=context.raw;
-let percent=total?((value/total)*100).toFixed(1):0;
-return context.label+" — "+percent+"%";
-}
-}
-}
-}
-}
-});
-}
-
-function updateAnalytics(expenseCat,incomeCat,totalExpense,totalIncome){
-
-let maxExpenseCat="",maxExpense=0;
-for(const c in expenseCat){
-if(expenseCat[c]>maxExpense){
-maxExpense=expenseCat[c];
-maxExpenseCat=c;
-}
-}
-
-let maxIncomeCat="",maxIncome=0;
-for(const c in incomeCat){
-if(incomeCat[c]>maxIncome){
-maxIncome=incomeCat[c];
-maxIncomeCat=c;
-}
-}
-
-const expPercent=totalExpense?((maxExpense/totalExpense)*100).toFixed(1):0;
-const incPercent=totalIncome?((maxIncome/totalIncome)*100).toFixed(1):0;
-
-document.getElementById("analytics").innerHTML=`
-🔥 Найбільші витрати: ${maxExpenseCat||"-"} (${expPercent}%)
-<br>
-💰 Основний дохід: ${maxIncomeCat||"-"} (${incPercent}%)
+document.getElementById("stats").innerHTML=`
+<div class="row"><div>Іра:</div><div>+${ira.income} / -${ira.expense}</div></div>
+<div class="row"><div>Міша:</div><div>+${misha.income} / -${misha.expense}</div></div>
+<div class="row"><div>Загальний дохід:</div><div>${totalIncome}</div></div>
+<div class="row"><div>Загальні витрати:</div><div>${totalExpense}</div></div>
 `;
+
+let biggestExpense="",maxExp=0;
+for(let cat in expenseCategories){
+if(expenseCategories[cat]>maxExp){
+maxExp=expenseCategories[cat];
+biggestExpense=cat;
+}
 }
 
-onSnapshot(query(ref,orderBy("createdAt","desc")),render);
+let biggestIncome="",maxInc=0;
+for(let cat in incomeCategories){
+if(incomeCategories[cat]>maxInc){
+maxInc=incomeCategories[cat];
+biggestIncome=cat;
+}
+}
+
+let expPercent=totalExpense?((maxExp/totalExpense)*100).toFixed(1):0;
+let incPercent=totalIncome?((maxInc/totalIncome)*100).toFixed(1):0;
+
+document.getElementById("analysis").innerHTML=`
+🔥 Найбільші витрати: ${biggestExpense||"-"} (${expPercent}% від витрат)<br>
+💰 Основний дохід: ${biggestIncome||"-"} (${incPercent}% від доходів)<br><br>
+💡 Якщо витрати по категорії перевищують 40% — варто переглянути бюджет.<br>
+🚀 Якщо дохід по категорії росте — це точка для масштабування.
+`;
+
+});
 
 </script>
-
 </body>
 </html>
