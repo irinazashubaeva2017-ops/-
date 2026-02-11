@@ -14,15 +14,14 @@ padding:0;
 font-family:-apple-system,BlinkMacSystemFont,sans-serif;
 background:#0e1116;
 color:#e5e7eb;
-touch-action:manipulation;
 }
 
 .app{
 max-width:430px;
 margin:auto;
 padding:20px;
-min-height:100vh;
 box-sizing:border-box;
+min-height:100vh;
 }
 
 .title{
@@ -53,7 +52,6 @@ border:1px solid #22262e;
 border-radius:14px;
 padding:12px;
 font-size:12px;
-box-sizing:border-box;
 }
 
 .switch{
@@ -111,6 +109,11 @@ font-size:12px;
 .income{color:#22c55e}
 .expense{color:#ef4444}
 
+.actions span{
+cursor:pointer;
+margin-left:8px;
+}
+
 .analytics{
 margin-top:15px;
 background:#161b22;
@@ -118,12 +121,6 @@ border:1px solid #22262e;
 border-radius:14px;
 padding:12px;
 font-size:12px;
-}
-
-.analytics h4{
-margin:0 0 8px 0;
-font-size:12px;
-opacity:0.7;
 }
 
 .denied{
@@ -186,11 +183,8 @@ font-size:18px;
 <div id="list"></div>
 
 <div class="analytics">
-<h4>📊 Аналітика витрат</h4>
-<div id="expenseAnalytics"></div>
-
-<h4 style="margin-top:10px;">💰 Джерела доходу</h4>
-<div id="incomeAnalytics"></div>
+<strong>Аналітика по категоріях</strong>
+<div id="analyticsBox"></div>
 </div>
 
 </div>
@@ -198,7 +192,7 @@ font-size:18px;
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig={
 apiKey:"AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
@@ -260,15 +254,30 @@ document.getElementById("amount").value="";
 document.getElementById("category").value="";
 }
 
+async function deleteOperation(id){
+await deleteDoc(doc(db,"operations",id));
+}
+
+async function editOperation(id,oldAmount,oldCategory){
+const newAmount=prompt("Нова сума:",oldAmount);
+const newCategory=prompt("Нова категорія:",oldCategory);
+if(!newAmount||!newCategory)return;
+
+await updateDoc(doc(db,"operations",id),{
+amount:parseFloat(newAmount),
+category:newCategory
+});
+}
+
 function render(snapshot){
 let iraIncome=0,iraExpense=0,mishaIncome=0,mishaExpense=0;
-let expenseByCat={}, incomeByCat={};
-
+let categoryTotals={};
 const list=document.getElementById("list");
 list.innerHTML="";
 
 snapshot.forEach(docSnap=>{
 const d=docSnap.data();
+const id=docSnap.id;
 
 if(d.author==="Іра"){
 if(d.type==="income")iraIncome+=d.amount;
@@ -278,17 +287,20 @@ if(d.type==="income")mishaIncome+=d.amount;
 else mishaExpense+=d.amount;
 }
 
-if(d.type==="expense"){
-expenseByCat[d.category]=(expenseByCat[d.category]||0)+d.amount;
-}else{
-incomeByCat[d.category]=(incomeByCat[d.category]||0)+d.amount;
-}
+categoryTotals[d.category]=(categoryTotals[d.category]||0)+d.amount;
 
 const div=document.createElement("div");
 div.className="item";
-div.innerHTML=`<div>${d.category} (${d.author})</div>
-<div class="${d.type}">
+div.innerHTML=`
+<div>${d.category} (${d.author})</div>
+<div>
+<span class="${d.type}">
 ${d.type==="income"?"+":"-"} ${d.amount}
+</span>
+<span class="actions">
+<span onclick="editOperation('${id}',${d.amount},'${d.category}')">✏️</span>
+<span onclick="deleteOperation('${id}')">🗑</span>
+</span>
 </div>`;
 list.appendChild(div);
 });
@@ -311,24 +323,12 @@ document.getElementById("totalExpense").innerText=totalExpense;
 document.getElementById("totalBalance").innerText=totalBalance+" грн";
 document.getElementById("percentUsed").innerText=percent+"%";
 
-renderAnalytics(expenseByCat,totalExpense,"expenseAnalytics");
-renderAnalytics(incomeByCat,totalIncome,"incomeAnalytics");
-}
-
-function renderAnalytics(obj,total,id){
-const container=document.getElementById(id);
-container.innerHTML="";
-if(!total){
-container.innerHTML="—";
-return;
-}
-
-Object.entries(obj).forEach(([cat,sum])=>{
-const percent=((sum/total)*100).toFixed(1);
+const analytics=document.getElementById("analyticsBox");
+analytics.innerHTML="";
+Object.entries(categoryTotals).forEach(([cat,sum])=>{
 const div=document.createElement("div");
-div.style.marginBottom="4px";
-div.innerHTML=`${cat}: ${sum} (${percent}%)`;
-container.appendChild(div);
+div.innerText=`${cat}: ${sum}`;
+analytics.appendChild(div);
 });
 }
 
