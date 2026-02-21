@@ -8,270 +8,315 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
+        :root {
+            --bg-color: #050505;
+            --surface: rgba(255, 255, 255, 0.05);
+            --surface-active: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #8b92a5;
+            --primary: #007aff;
+            --income: #34c759;
+            --expense: #ff3b30;
+            --glow-income: rgba(52, 199, 89, 0.3);
+            --glow-expense: rgba(255, 59, 48, 0.3);
+            --glow-primary: rgba(0, 122, 255, 0.3);
+        }
+
         html, body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #0e1116;
-            color: #e5e7eb;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            background: var(--bg-color);
+            background-image: radial-gradient(circle at 50% -10%, #1a1e2a 0%, var(--bg-color) 60%);
+            color: var(--text-main);
             -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
         }
 
         .app {
             max-width: 430px;
             margin: auto;
-            padding: 20px;
+            padding: 24px 20px 50px 20px;
             box-sizing: border-box;
-            min-height: 100vh;
-            padding-bottom: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Ефект скла для карток */
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
+        .title-container {
+            text-align: center;
+            margin-bottom: 8px;
         }
 
         .title {
-            text-align: center;
-            font-size: 14px;
-            letter-spacing: 3px;
-            font-weight: 600;
-            color: #3b82f6;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        .balance-card {
-            background: linear-gradient(145deg, #1f2937, #111827);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            margin-bottom: 20px;
-            border: 1px solid #374151;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .balance-label {
-            font-size: 12px;
-            opacity: 0.7;
-            margin-bottom: 5px;
-        }
-
-        .balance-amount {
-            font-size: 38px;
-            font-weight: 800;
-            letter-spacing: -1px;
-        }
-
-        .cardRow {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .card {
-            flex: 1;
-            background: #161b22;
-            border: 1px solid #22262e;
-            border-radius: 16px;
-            padding: 15px;
-            font-size: 13px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .user-title {
-            font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 4px;
-            color: #fff;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            opacity: 0.8;
-        }
-
-        .highlight { color: #fff; font-weight: 600; }
-
-        .switch {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            background: #161b22;
-            padding: 4px;
-            border-radius: 16px;
-            border: 1px solid #22262e;
-        }
-
-        .switch button {
-            flex: 1;
-            padding: 10px;
-            border-radius: 12px;
-            border: none;
-            background: transparent;
-            color: #9ca3af;
-            font-weight: 500;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .switch button.active {
-            background: #3b82f6;
-            color: white;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
-        }
-        
-        .switch button#expenseBtn.active {
-            background: #ef4444;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-        }
-
-        .switch button#incomeBtn.active {
-            background: #22c55e;
-            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
-        }
-
-        /* Стилі для вкладок історії */
-        .hist-switch {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 15px;
-            background: #0d1117;
-            padding: 4px;
-            border-radius: 12px;
-            border: 1px solid #2a2f38;
-        }
-        .hist-switch button {
-            flex: 1;
-            padding: 8px;
-            border-radius: 8px;
-            border: none;
-            background: transparent;
-            color: #6b7280;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .hist-switch button.active {
-            background: #1f2937;
-            color: white;
-        }
-
-        input[type="text"], input[type="month"] {
-            width: 100%;
-            padding: 14px;
-            border-radius: 14px;
-            border: 1px solid #2a2f38;
-            background: #0d1117;
-            color: white;
-            margin-bottom: 10px;
-            box-sizing: border-box;
             font-size: 16px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        
-        input:focus {
-            border-color: #3b82f6;
+            letter-spacing: 4px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #8b92a5 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
         }
 
         .filter-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
         }
 
         .filter-row input[type="month"] {
-            width: auto;
-            margin: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
             padding: 8px 12px;
             font-size: 14px;
-            border-radius: 10px;
-            color: #9ca3af;
+            border-radius: 12px;
+            font-family: inherit;
+            outline: none;
         }
+
+        .balance-card {
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50px; left: 50%;
+            transform: translateX(-50%);
+            width: 100px; height: 100px;
+            background: var(--primary);
+            filter: blur(60px);
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .balance-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            margin-bottom: 8px;
+        }
+
+        .cardRow {
+            display: flex;
+            gap: 12px;
+        }
+
+        .card {
+            flex: 1;
+            padding: 16px;
+        }
+
+        .user-title {
+            font-weight: 700;
+            font-size: 15px;
+            margin-bottom: 12px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .stat-row:last-child { margin-bottom: 0; }
+        .highlight { color: var(--text-main); font-weight: 600; }
+        
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 0;
+        }
+
+        /* iOS стилізація перемикачів */
+        .switch {
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            padding: 4px;
+            border-radius: 14px;
+        }
+
+        .switch button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .switch button.active {
+            background: var(--surface-active);
+            color: var(--text-main);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .switch button#expenseBtn.active { color: var(--expense); }
+        .switch button#incomeBtn.active { color: var(--income); }
+
+        .hist-switch {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .hist-switch button {
+            flex: 1;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .hist-switch button.active {
+            background: var(--surface-active);
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+            color: var(--text-main);
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            background: rgba(0, 122, 255, 0.05);
+        }
+        
+        input[type="text"]::placeholder { color: #5a6072; }
 
         button.main {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             border-radius: 14px;
             border: none;
-            background: #22c55e; 
+            background: var(--income);
             color: white;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 16px;
-            margin-bottom: 25px;
             cursor: pointer;
-            transition: transform 0.1s;
+            transition: all 0.2s;
+            box-shadow: 0 8px 24px var(--glow-income);
         }
 
-        button.main:active {
-            transform: scale(0.98);
-        }
-
-        button.main:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
+        button.main:active { transform: scale(0.97); }
+        button.main:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .list-header {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
-            padding-left: 5px;
-            color: #9ca3af;
+            color: var(--text-main);
+            margin-top: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Анімація появи записів */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
+            padding: 14px 16px;
             margin-bottom: 8px;
-            background: #161b22;
-            border: 1px solid #22262e;
-            border-radius: 12px;
-            font-size: 13px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            animation: slideUp 0.3s ease forwards;
+            transition: transform 0.2s;
         }
 
-        .income-text { color: #22c55e; font-weight: 600; }
-        .expense-text { color: #ef4444; font-weight: 600; }
+        .item:hover { background: rgba(255,255,255,0.05); }
 
-        .meta {
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
+        .item-category { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .meta { font-size: 12px; color: var(--text-muted); }
+
+        .income-text { color: var(--income); font-weight: 700; font-size: 15px; }
+        .expense-text { color: var(--expense); font-weight: 700; font-size: 15px; }
 
         .actions {
             display: flex;
-            gap: 15px;
-            margin-left: 10px;
-            margin-top: 5px;
+            gap: 12px;
+            margin-top: 6px;
             justify-content: flex-end;
         }
 
         .action-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 12px;
+            color: var(--text-main);
             cursor: pointer;
-            font-size: 15px;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-            padding: 4px;
+            transition: 0.2s;
         }
         
-        .action-btn:hover { opacity: 1; }
+        .action-btn:active { transform: scale(0.9); background: var(--surface-active); }
 
         .analytics {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #22262e;
+            margin-top: 10px;
+            padding: 20px;
         }
 
         .cat-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #1f242c;
-            font-size: 13px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
         }
+        
+        .cat-row:last-child { border-bottom: none; }
 
         .denied {
             display: flex;
@@ -279,7 +324,8 @@
             align-items: center;
             height: 100vh;
             font-size: 18px;
-            color: #ef4444;
+            color: var(--expense);
+            font-weight: 600;
         }
     </style>
 </head>
@@ -292,37 +338,37 @@
 
 <div class="app" id="app" style="display:none;">
 
-    <div class="title">TEQRA • DUO</div>
+    <div class="title-container">
+        <div class="title">TEQRA • DUO</div>
+    </div>
     
     <div class="filter-row">
-        <div class="list-header" style="color: #fff;">Статистика за:</div>
+        <div class="list-header">Огляд місяця</div>
         <input type="month" id="monthFilter">
     </div>
 
-    <div class="balance-card">
-        <div class="balance-label">Загальний баланс (за місяць)</div>
+    <div class="glass balance-card">
+        <div class="balance-label">Загальний баланс</div>
         <div class="balance-amount" id="totalBalance">0</div>
-        <div style="font-size: 12px; margin-top: 5px; color: #9ca3af;">
-            Витрачено від доходу: <span id="percentUsed" style="color:#fff">0%</span>
+        <div style="font-size: 13px; color: var(--text-muted); font-weight: 500;">
+            Витрачено від доходу: <span id="percentUsed" style="color:var(--text-main)">0%</span>
         </div>
     </div>
 
     <div class="cardRow">
-        <div class="card">
+        <div class="glass card">
             <div class="user-title">Іра</div>
             <div class="stat-row"><span>Вхід:</span> <span class="highlight" id="iraIncome">0</span></div>
             <div class="stat-row"><span>Вихід:</span> <span class="highlight" id="iraExpense">0</span></div>
-            <div style="margin-top:5px; padding-top:5px; border-top:1px solid #2a2f38" class="stat-row">
-                <span>Бал:</span> <span style="color:#3b82f6" id="iraBalance">0</span>
-            </div>
+            <div class="divider"></div>
+            <div class="stat-row"><span>Бал:</span> <span style="color:var(--primary); font-weight:700;" id="iraBalance">0</span></div>
         </div>
-        <div class="card">
+        <div class="glass card">
             <div class="user-title">Міша</div>
             <div class="stat-row"><span>Вхід:</span> <span class="highlight" id="mishaIncome">0</span></div>
             <div class="stat-row"><span>Вихід:</span> <span class="highlight" id="mishaExpense">0</span></div>
-            <div style="margin-top:5px; padding-top:5px; border-top:1px solid #2a2f38" class="stat-row">
-                <span>Бал:</span> <span style="color:#3b82f6" id="mishaBalance">0</span>
-            </div>
+            <div class="divider"></div>
+            <div class="stat-row"><span>Бал:</span> <span style="color:var(--primary); font-weight:700;" id="mishaBalance">0</span></div>
         </div>
     </div>
 
@@ -336,12 +382,13 @@
         <button id="expenseBtn">Витрата (-)</button>
     </div>
 
-    <input type="text" inputmode="decimal" id="amount" placeholder="Сума (напр. 500)" onfocus="this.select()">
-    <input type="text" id="category" placeholder="Категорія (напр. Кава, Тканина)">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        <input type="text" inputmode="decimal" id="amount" placeholder="Сума (напр. 500)" onfocus="this.select()">
+        <input type="text" id="category" placeholder="Категорія (напр. Тканина, Кава)">
+        <button class="main" id="addBtn">Додати запис</button>
+    </div>
 
-    <button class="main" id="addBtn">Додати</button>
-
-    <div class="list-header" style="margin-bottom: 10px;">Історія операцій</div>
+    <div class="list-header" style="margin-top: 15px;">Історія операцій</div>
     
     <div class="hist-switch">
         <button id="histAllBtn" class="active">Всі</button>
@@ -351,8 +398,8 @@
 
     <div id="list"></div>
 
-    <div class="analytics">
-        <div class="list-header">Топ витрат за місяць</div>
+    <div class="glass analytics">
+        <div class="list-header" style="margin-top: 0; margin-bottom: 10px;">Топ витрат</div>
         <div id="analyticsBox"></div>
     </div>
 
@@ -378,27 +425,28 @@
     const tg = window.Telegram.WebApp;
     tg.expand(); 
     
+    // Колір хедера Телеграму під стиль додатку
+    tg.setHeaderColor('#050505');
+    tg.setBackgroundColor('#050505');
+    
     const allowed = [7255848995, 921509542]; 
     const uid = tg.initDataUnsafe?.user?.id;
 
     if (uid && !allowed.includes(uid)) {
         document.getElementById("denied").style.display = "flex";
     } else {
-        document.getElementById("app").style.display = "block";
+        document.getElementById("app").style.display = "flex";
     }
 
-    // --- Стан додатку ---
     let currentUser = "Іра";
     let currentType = "income";
-    let historyView = "all"; // all, income, expense
-    let allDocs = []; // Сюди зберігаємо всі дані з Firebase
+    let historyView = "all";
+    let allDocs = []; 
 
-    // Встановлюємо поточний місяць за замовчуванням
     const now = new Date();
     const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     document.getElementById("monthFilter").value = currentMonthStr;
 
-    // --- DOM Елементи ---
     const elements = {
         iraBtn: document.getElementById("iraBtn"),
         mishaBtn: document.getElementById("mishaBtn"),
@@ -414,7 +462,6 @@
         histExpBtn: document.getElementById("histExpBtn")
     };
 
-    // --- Допоміжні функції ---
     const formatMoney = (num) => {
         return new Intl.NumberFormat('uk-UA', { 
             minimumFractionDigits: 0, 
@@ -429,7 +476,6 @@
         }
     };
 
-    // --- Обробники подій ---
     elements.iraBtn.addEventListener('click', () => {
         currentUser = "Іра";
         elements.iraBtn.classList.add("active");
@@ -448,7 +494,8 @@
         currentType = "income";
         elements.incomeBtn.classList.add("active");
         elements.expenseBtn.classList.remove("active");
-        elements.addBtn.style.background = '#22c55e';
+        elements.addBtn.style.background = 'var(--income)';
+        elements.addBtn.style.boxShadow = '0 8px 24px var(--glow-income)';
         triggerHaptic('light');
     });
 
@@ -456,11 +503,11 @@
         currentType = "expense";
         elements.expenseBtn.classList.add("active");
         elements.incomeBtn.classList.remove("active");
-        elements.addBtn.style.background = '#ef4444';
+        elements.addBtn.style.background = 'var(--expense)';
+        elements.addBtn.style.boxShadow = '0 8px 24px var(--glow-expense)';
         triggerHaptic('light');
     });
 
-    // Фільтри історії
     const updateHistBtns = () => {
         elements.histAllBtn.classList.toggle("active", historyView === "all");
         elements.histIncBtn.classList.toggle("active", historyView === "income");
@@ -471,13 +518,11 @@
     elements.histIncBtn.addEventListener('click', () => { historyView = "income"; updateHistBtns(); renderUI(); triggerHaptic('light'); });
     elements.histExpBtn.addEventListener('click', () => { historyView = "expense"; updateHistBtns(); renderUI(); triggerHaptic('light'); });
 
-    // Зміна місяця
     elements.monthFilter.addEventListener('change', () => {
         renderUI();
         triggerHaptic('medium');
     });
 
-    // Додавання
     elements.addBtn.addEventListener('click', async () => {
         const val = elements.amountInput.value.replace(',', '.').trim();
         const amount = parseFloat(val);
@@ -490,7 +535,7 @@
         }
 
         elements.addBtn.disabled = true;
-        elements.addBtn.innerText = "⏳ Обробка...";
+        elements.addBtn.innerText = "⏳...";
 
         try {
             await addDoc(ref, {
@@ -509,14 +554,14 @@
             triggerHaptic('error');
         } finally {
             elements.addBtn.disabled = false;
-            elements.addBtn.innerText = "Додати";
+            elements.addBtn.innerText = "Додати запис";
             elements.amountInput.focus();
         }
     });
 
-    // Редагування та видалення
     elements.list.addEventListener('click', async (e) => {
-        const target = e.target;
+        const target = e.target.closest('.action-btn');
+        if (!target) return;
         
         if (target.classList.contains('del-btn')) {
             const id = target.dataset.id;
@@ -551,7 +596,6 @@
         }
     });
 
-    // --- Головна функція відмальовки ---
     function renderUI() {
         let iraIncome = 0, iraExpense = 0;
         let mishaIncome = 0, mishaExpense = 0;
@@ -559,22 +603,19 @@
 
         elements.list.innerHTML = "";
         
-        const selectedMonth = elements.monthFilter.value; // формат "YYYY-MM" або ""
+        const selectedMonth = elements.monthFilter.value;
 
-        allDocs.forEach(docSnap => {
+        allDocs.forEach((docSnap, index) => {
             const d = docSnap.data();
             const id = docSnap.id;
             
             if(!d.amount) return;
 
-            // Фільтрація по даті
             const dateObj = d.createdAt ? d.createdAt.toDate() : new Date();
             const docMonth = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
             
-            // Якщо вибрано місяць і він не співпадає - пропускаємо (не рахуємо і не показуємо)
             if (selectedMonth && docMonth !== selectedMonth) return;
 
-            // Підрахунок балансів
             if (d.author === "Іра") {
                 if (d.type === "income") iraIncome += d.amount;
                 else iraExpense += d.amount;
@@ -587,39 +628,37 @@
                 expenseCategories[d.category] = (expenseCategories[d.category] || 0) + d.amount;
             }
 
-            // Фільтрація списку за вкладкою (Доходи/Витрати)
             if (historyView !== "all" && d.type !== historyView) return;
 
-            // Форматування дати
             const dateStr = d.createdAt 
                 ? dateObj.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' }) + ' ' + 
                   dateObj.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
                 : "Щойно";
 
-            // Малюємо елемент
             const div = document.createElement("div");
             div.className = "item";
+            // Додаємо невелику затримку для анімації кожного наступного елемента списку
+            div.style.animationDelay = `${index * 0.05}s`;
             
             const sign = d.type === "income" ? "+" : "-";
             const colorClass = d.type === "income" ? "income-text" : "expense-text";
             
             div.innerHTML = `
-                <div>
-                    <div style="font-weight:600">${d.category}</div>
+                <div style="flex:1">
+                    <div class="item-category">${d.category}</div>
                     <div class="meta">${d.author} • ${dateStr}</div>
                 </div>
                 <div style="text-align:right">
-                    <span class="${colorClass}">${sign} ${formatMoney(d.amount)}</span>
+                    <div class="${colorClass}">${sign} ${formatMoney(d.amount)} ₴</div>
                     <div class="actions">
-                        <span class="action-btn edit-btn" data-id="${id}" data-amount="${d.amount}" data-category="${d.category}">✏️</span>
-                        <span class="action-btn del-btn" data-id="${id}">🗑</span>
+                        <div class="action-btn edit-btn" data-id="${id}" data-amount="${d.amount}" data-category="${d.category}">Ред.</div>
+                        <div class="action-btn del-btn" data-id="${id}" style="color: var(--expense); border-color: rgba(255, 59, 48, 0.3);">Вид.</div>
                     </div>
                 </div>`;
             
             elements.list.appendChild(div);
         });
 
-        // Оновлення балансів на екрані
         document.getElementById("iraIncome").innerText = formatMoney(iraIncome);
         document.getElementById("iraExpense").innerText = formatMoney(iraExpense);
         document.getElementById("iraBalance").innerText = formatMoney(iraIncome - iraExpense);
@@ -637,29 +676,27 @@
         document.getElementById("totalBalance").innerText = formatMoney(totalBalance) + " ₴";
         document.getElementById("percentUsed").innerText = percent + "%";
 
-        // Оновлення аналітики
         const analyticsBox = document.getElementById("analyticsBox");
         analyticsBox.innerHTML = "";
         
         const sortedCats = Object.entries(expenseCategories).sort((a, b) => b[1] - a[1]);
         
         if (sortedCats.length === 0) {
-            analyticsBox.innerHTML = "<div style='text-align:center; opacity:0.5; padding:10px'>Немає витрат за цей період</div>";
+            analyticsBox.innerHTML = "<div style='text-align:center; color: var(--text-muted); padding:10px; font-size: 13px;'>Немає витрат</div>";
         }
 
         sortedCats.forEach(([cat, sum]) => {
             const row = document.createElement("div");
             row.className = "cat-row";
-            row.innerHTML = `<span>${cat}</span> <span style="color:#ef4444">-${formatMoney(sum)}</span>`;
+            row.innerHTML = `<span>${cat}</span> <span style="color:var(--expense); font-weight:600;">-${formatMoney(sum)} ₴</span>`;
             analyticsBox.appendChild(row);
         });
     }
 
-    // Підписка на оновлення бази
     const q = query(ref, orderBy("createdAt", "desc"));
     onSnapshot(q, (snapshot) => {
-        allDocs = snapshot.docs; // Зберігаємо всі документи
-        renderUI(); // Відмальовуємо з урахуванням фільтрів
+        allDocs = snapshot.docs;
+        renderUI(); 
     });
 
 </script>
