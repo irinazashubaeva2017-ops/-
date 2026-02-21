@@ -129,7 +129,34 @@
             box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
         }
 
-        input {
+        /* Стилі для вкладок історії */
+        .hist-switch {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 15px;
+            background: #0d1117;
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid #2a2f38;
+        }
+        .hist-switch button {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .hist-switch button.active {
+            background: #1f2937;
+            color: white;
+        }
+
+        input[type="text"], input[type="month"] {
             width: 100%;
             padding: 14px;
             border-radius: 14px;
@@ -147,12 +174,28 @@
             border-color: #3b82f6;
         }
 
+        .filter-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .filter-row input[type="month"] {
+            width: auto;
+            margin: 0;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 10px;
+            color: #9ca3af;
+        }
+
         button.main {
             width: 100%;
             padding: 14px;
             border-radius: 14px;
             border: none;
-            background: #22c55e; /* За замовчуванням зелений, бо income */
+            background: #22c55e; 
             color: white;
             font-weight: 600;
             font-size: 16px;
@@ -173,7 +216,6 @@
         .list-header {
             font-size: 14px;
             font-weight: 600;
-            margin-bottom: 10px;
             padding-left: 5px;
             color: #9ca3af;
         }
@@ -252,8 +294,13 @@
 
     <div class="title">TEQRA • DUO</div>
     
+    <div class="filter-row">
+        <div class="list-header" style="color: #fff;">Статистика за:</div>
+        <input type="month" id="monthFilter">
+    </div>
+
     <div class="balance-card">
-        <div class="balance-label">Загальний баланс</div>
+        <div class="balance-label">Загальний баланс (за місяць)</div>
         <div class="balance-amount" id="totalBalance">0</div>
         <div style="font-size: 12px; margin-top: 5px; color: #9ca3af;">
             Витрачено від доходу: <span id="percentUsed" style="color:#fff">0%</span>
@@ -290,15 +337,22 @@
     </div>
 
     <input type="text" inputmode="decimal" id="amount" placeholder="Сума (напр. 500)" onfocus="this.select()">
-    <input type="text" id="category" placeholder="Категорія (напр. Кава)">
+    <input type="text" id="category" placeholder="Категорія (напр. Кава, Тканина)">
 
     <button class="main" id="addBtn">Додати</button>
 
-    <div class="list-header">Історія операцій</div>
+    <div class="list-header" style="margin-bottom: 10px;">Історія операцій</div>
+    
+    <div class="hist-switch">
+        <button id="histAllBtn" class="active">Всі</button>
+        <button id="histIncBtn">Доходи</button>
+        <button id="histExpBtn">Витрати</button>
+    </div>
+
     <div id="list"></div>
 
     <div class="analytics">
-        <div class="list-header">Топ витрат за категоріями</div>
+        <div class="list-header">Топ витрат за місяць</div>
         <div id="analyticsBox"></div>
     </div>
 
@@ -308,7 +362,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // --- Налаштування Firebase ---
     const firebaseConfig = {
         apiKey: "AIzaSyBSCke0wwX9GbZRiw1xG97v7KWRUERQsc",
         authDomain: "finance-eec75.firebaseapp.com",
@@ -322,7 +375,6 @@
     const db = getFirestore(app);
     const ref = collection(db, "operations");
 
-    // --- Налаштування Telegram ---
     const tg = window.Telegram.WebApp;
     tg.expand(); 
     
@@ -338,6 +390,13 @@
     // --- Стан додатку ---
     let currentUser = "Іра";
     let currentType = "income";
+    let historyView = "all"; // all, income, expense
+    let allDocs = []; // Сюди зберігаємо всі дані з Firebase
+
+    // Встановлюємо поточний місяць за замовчуванням
+    const now = new Date();
+    const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    document.getElementById("monthFilter").value = currentMonthStr;
 
     // --- DOM Елементи ---
     const elements = {
@@ -348,7 +407,11 @@
         addBtn: document.getElementById("addBtn"),
         amountInput: document.getElementById("amount"),
         catInput: document.getElementById("category"),
-        list: document.getElementById("list")
+        list: document.getElementById("list"),
+        monthFilter: document.getElementById("monthFilter"),
+        histAllBtn: document.getElementById("histAllBtn"),
+        histIncBtn: document.getElementById("histIncBtn"),
+        histExpBtn: document.getElementById("histExpBtn")
     };
 
     // --- Допоміжні функції ---
@@ -366,7 +429,7 @@
         }
     };
 
-    // --- Обробники подій для кнопок управління ---
+    // --- Обробники подій ---
     elements.iraBtn.addEventListener('click', () => {
         currentUser = "Іра";
         elements.iraBtn.classList.add("active");
@@ -397,7 +460,24 @@
         triggerHaptic('light');
     });
 
-    // --- Логіка роботи з даними ---
+    // Фільтри історії
+    const updateHistBtns = () => {
+        elements.histAllBtn.classList.toggle("active", historyView === "all");
+        elements.histIncBtn.classList.toggle("active", historyView === "income");
+        elements.histExpBtn.classList.toggle("active", historyView === "expense");
+    };
+
+    elements.histAllBtn.addEventListener('click', () => { historyView = "all"; updateHistBtns(); renderUI(); triggerHaptic('light'); });
+    elements.histIncBtn.addEventListener('click', () => { historyView = "income"; updateHistBtns(); renderUI(); triggerHaptic('light'); });
+    elements.histExpBtn.addEventListener('click', () => { historyView = "expense"; updateHistBtns(); renderUI(); triggerHaptic('light'); });
+
+    // Зміна місяця
+    elements.monthFilter.addEventListener('change', () => {
+        renderUI();
+        triggerHaptic('medium');
+    });
+
+    // Додавання
     elements.addBtn.addEventListener('click', async () => {
         const val = elements.amountInput.value.replace(',', '.').trim();
         const amount = parseFloat(val);
@@ -434,11 +514,10 @@
         }
     });
 
-    // Делегування подій для кнопок редагування/видалення в списку
+    // Редагування та видалення
     elements.list.addEventListener('click', async (e) => {
         const target = e.target;
         
-        // Видалення
         if (target.classList.contains('del-btn')) {
             const id = target.dataset.id;
             if(confirm("Видалити цей запис?")) {
@@ -447,7 +526,6 @@
             }
         }
         
-        // Редагування
         if (target.classList.contains('edit-btn')) {
             const id = target.dataset.id;
             const oldAmount = target.dataset.amount;
@@ -473,20 +551,30 @@
         }
     });
 
-    // --- Рендеринг (Малювання) ---
-    function render(snapshot) {
+    // --- Головна функція відмальовки ---
+    function renderUI() {
         let iraIncome = 0, iraExpense = 0;
         let mishaIncome = 0, mishaExpense = 0;
         let expenseCategories = {}; 
 
         elements.list.innerHTML = "";
+        
+        const selectedMonth = elements.monthFilter.value; // формат "YYYY-MM" або ""
 
-        snapshot.forEach(docSnap => {
+        allDocs.forEach(docSnap => {
             const d = docSnap.data();
             const id = docSnap.id;
             
-            if(!d.amount) return; // Захист від битих даних
+            if(!d.amount) return;
 
+            // Фільтрація по даті
+            const dateObj = d.createdAt ? d.createdAt.toDate() : new Date();
+            const docMonth = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+            
+            // Якщо вибрано місяць і він не співпадає - пропускаємо (не рахуємо і не показуємо)
+            if (selectedMonth && docMonth !== selectedMonth) return;
+
+            // Підрахунок балансів
             if (d.author === "Іра") {
                 if (d.type === "income") iraIncome += d.amount;
                 else iraExpense += d.amount;
@@ -499,6 +587,15 @@
                 expenseCategories[d.category] = (expenseCategories[d.category] || 0) + d.amount;
             }
 
+            // Фільтрація списку за вкладкою (Доходи/Витрати)
+            if (historyView !== "all" && d.type !== historyView) return;
+
+            // Форматування дати
+            const dateStr = d.createdAt 
+                ? dateObj.toLocaleDateString('uk-UA', { day: '2-digit', month: '2-digit' }) + ' ' + 
+                  dateObj.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+                : "Щойно";
+
             // Малюємо елемент
             const div = document.createElement("div");
             div.className = "item";
@@ -509,7 +606,7 @@
             div.innerHTML = `
                 <div>
                     <div style="font-weight:600">${d.category}</div>
-                    <div class="meta">${d.author}</div>
+                    <div class="meta">${d.author} • ${dateStr}</div>
                 </div>
                 <div style="text-align:right">
                     <span class="${colorClass}">${sign} ${formatMoney(d.amount)}</span>
@@ -522,7 +619,7 @@
             elements.list.appendChild(div);
         });
 
-        // Оновлення балансів
+        // Оновлення балансів на екрані
         document.getElementById("iraIncome").innerText = formatMoney(iraIncome);
         document.getElementById("iraExpense").innerText = formatMoney(iraExpense);
         document.getElementById("iraBalance").innerText = formatMoney(iraIncome - iraExpense);
@@ -547,7 +644,7 @@
         const sortedCats = Object.entries(expenseCategories).sort((a, b) => b[1] - a[1]);
         
         if (sortedCats.length === 0) {
-            analyticsBox.innerHTML = "<div style='text-align:center; opacity:0.5; padding:10px'>Поки немає витрат</div>";
+            analyticsBox.innerHTML = "<div style='text-align:center; opacity:0.5; padding:10px'>Немає витрат за цей період</div>";
         }
 
         sortedCats.forEach(([cat, sum]) => {
@@ -560,7 +657,10 @@
 
     // Підписка на оновлення бази
     const q = query(ref, orderBy("createdAt", "desc"));
-    onSnapshot(q, render);
+    onSnapshot(q, (snapshot) => {
+        allDocs = snapshot.docs; // Зберігаємо всі документи
+        renderUI(); // Відмальовуємо з урахуванням фільтрів
+    });
 
 </script>
 
