@@ -15,8 +15,8 @@
             --border: #27272a;
             --text-main: #fcfcfc;
             --text-muted: #8b8b93;
-            --income: #32d74b;  /* Apple Dark Mode Green */
-            --expense: #ff453a; /* Apple Dark Mode Red */
+            --income: #32d74b;  
+            --expense: #ff453a; 
             --radius-lg: 20px;
             --radius-md: 14px;
             --radius-sm: 10px;
@@ -146,7 +146,6 @@
             margin: 12px 0;
         }
 
-        /* Преміальні перемикачі (як в iOS) */
         .switch {
             display: flex;
             background: var(--surface);
@@ -201,7 +200,6 @@
             border-color: var(--text-main);
         }
 
-        /* Поля вводу */
         input[type="text"] {
             width: 100%;
             padding: 16px;
@@ -222,7 +220,6 @@
         
         input[type="text"]::placeholder { color: #52525b; }
 
-        /* Головна кнопка */
         button.main {
             width: 100%;
             padding: 16px;
@@ -268,7 +265,8 @@
         .meta { font-size: 13px; color: var(--text-muted); }
 
         .income-text { color: var(--income); font-weight: 600; font-size: 16px; }
-        .expense-text { color: var(--text-main); font-weight: 600; font-size: 16px; }
+        /* ОСЬ ТУТ Я ПОВЕРНУЛА КОЛІР ВИТРАТ */
+        .expense-text { color: var(--expense); font-weight: 600; font-size: 16px; }
 
         .actions {
             display: flex;
@@ -661,7 +659,7 @@
         sortedCats.forEach(([cat, sum]) => {
             const row = document.createElement("div");
             row.className = "cat-row";
-            row.innerHTML = `<span style="font-weight: 500;">${cat}</span> <span style="font-weight:600;">${formatMoney(sum)} ₴</span>`;
+            row.innerHTML = `<span style="font-weight: 500;">${cat}</span> <span style="font-weight:600; color: var(--expense);">${formatMoney(sum)} ₴</span>`;
             analyticsBox.appendChild(row);
         });
     }
