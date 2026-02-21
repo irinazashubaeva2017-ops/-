@@ -9,26 +9,21 @@
 
     <style>
         :root {
-            --bg-color: #050505;
-            --surface: rgba(255, 255, 255, 0.05);
-            --surface-active: rgba(255, 255, 255, 0.1);
-            --border: rgba(255, 255, 255, 0.08);
-            --text-main: #ffffff;
-            --text-muted: #8b92a5;
-            --primary: #007aff;
-            --income: #34c759;
-            --expense: #ff3b30;
-            --glow-income: rgba(52, 199, 89, 0.3);
-            --glow-expense: rgba(255, 59, 48, 0.3);
-            --glow-primary: rgba(0, 122, 255, 0.3);
+            --bg: #000000;
+            --card: #111111;
+            --border: #262626;
+            --text-main: #ececec;
+            --text-muted: #808080;
+            --income: #34d399;
+            --expense: #f87171;
+            --radius: 10px;
         }
 
         html, body {
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-            background: var(--bg-color);
-            background-image: radial-gradient(circle at 50% -10%, #1a1e2a 0%, var(--bg-color) 60%);
+            background: var(--bg);
             color: var(--text-main);
             -webkit-tap-highlight-color: transparent;
             min-height: 100vh;
@@ -44,28 +39,16 @@
             gap: 16px;
         }
 
-        /* Ефект скла для карток */
-        .glass {
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-        }
-
         .title-container {
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
 
         .title {
-            font-size: 16px;
-            letter-spacing: 4px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #fff 0%, #8b92a5 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            color: var(--text-main);
         }
 
         .filter-row {
@@ -75,48 +58,36 @@
         }
 
         .filter-row input[type="month"] {
-            background: var(--surface);
+            background: transparent;
             border: 1px solid var(--border);
             color: var(--text-main);
-            padding: 8px 12px;
+            padding: 6px 10px;
             font-size: 14px;
-            border-radius: 12px;
+            border-radius: 6px;
             font-family: inherit;
             outline: none;
         }
 
         .balance-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 24px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .balance-card::before {
-            content: '';
-            position: absolute;
-            top: -50px; left: 50%;
-            transform: translateX(-50%);
-            width: 100px; height: 100px;
-            background: var(--primary);
-            filter: blur(60px);
-            opacity: 0.2;
-            pointer-events: none;
         }
 
         .balance-label {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-muted);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 500;
+            letter-spacing: 0.5px;
         }
 
         .balance-amount {
-            font-size: 42px;
-            font-weight: 800;
-            letter-spacing: -1.5px;
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: -1px;
             margin-bottom: 8px;
         }
 
@@ -127,15 +98,18 @@
 
         .card {
             flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
             padding: 16px;
         }
 
         .user-title {
-            font-weight: 700;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 14px;
             margin-bottom: 12px;
             text-align: center;
-            letter-spacing: 0.5px;
+            color: var(--text-muted);
         }
 
         .stat-row {
@@ -147,40 +121,38 @@
         }
 
         .stat-row:last-child { margin-bottom: 0; }
-        .highlight { color: var(--text-main); font-weight: 600; }
+        .highlight { color: var(--text-main); font-weight: 500; }
         
         .divider {
             height: 1px;
             background: var(--border);
-            margin: 8px 0;
+            margin: 10px 0;
         }
 
-        /* iOS стилізація перемикачів */
         .switch {
             display: flex;
-            background: rgba(0,0,0,0.3);
+            background: var(--card);
             border: 1px solid var(--border);
             padding: 4px;
-            border-radius: 14px;
+            border-radius: var(--radius);
         }
 
         .switch button {
             flex: 1;
             padding: 10px;
-            border-radius: 10px;
+            border-radius: 6px;
             border: none;
             background: transparent;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 500;
             font-size: 14px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            transition: 0.1s;
         }
 
         .switch button.active {
-            background: var(--surface-active);
+            background: #262626;
             color: var(--text-main);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
 
         .switch button#expenseBtn.active { color: var(--expense); }
@@ -188,100 +160,83 @@
 
         .hist-switch {
             display: flex;
-            gap: 4px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 4px;
         }
         
         .hist-switch button {
-            flex: 1;
-            padding: 8px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: rgba(0,0,0,0.2);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            background: transparent;
             color: var(--text-muted);
             font-size: 13px;
-            font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
         }
         
         .hist-switch button.active {
-            background: var(--surface-active);
+            background: var(--card);
+            border-color: var(--border);
             color: var(--text-main);
-            border-color: rgba(255,255,255,0.15);
         }
 
         input[type="text"] {
             width: 100%;
-            padding: 16px;
-            border-radius: 14px;
+            padding: 14px;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
-            background: rgba(0,0,0,0.2);
+            background: transparent;
             color: var(--text-main);
-            font-size: 16px;
+            font-size: 15px;
             box-sizing: border-box;
             outline: none;
-            transition: all 0.2s;
         }
         
         input[type="text"]:focus {
-            border-color: var(--primary);
-            background: rgba(0, 122, 255, 0.05);
+            border-color: #555;
         }
         
-        input[type="text"]::placeholder { color: #5a6072; }
+        input[type="text"]::placeholder { color: #555; }
 
         button.main {
             width: 100%;
-            padding: 16px;
-            border-radius: 14px;
+            padding: 14px;
+            border-radius: var(--radius);
             border: none;
-            background: var(--income);
-            color: white;
-            font-weight: 700;
-            font-size: 16px;
+            background: var(--text-main);
+            color: var(--bg);
+            font-weight: 600;
+            font-size: 15px;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 8px 24px var(--glow-income);
         }
 
-        button.main:active { transform: scale(0.97); }
-        button.main:disabled { opacity: 0.6; cursor: not-allowed; }
+        button.main:active { opacity: 0.8; }
+        button.main:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .list-header {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-main);
-            margin-top: 8px;
-            letter-spacing: 0.3px;
-        }
-
-        /* Анімація появи записів */
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
 
         .item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 16px;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            animation: slideUp 0.3s ease forwards;
-            transition: transform 0.2s;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .item:hover { background: rgba(255,255,255,0.05); }
+        .item:last-child { border-bottom: none; }
 
-        .item-category { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .item-category { font-weight: 500; font-size: 15px; margin-bottom: 4px; }
         .meta { font-size: 12px; color: var(--text-muted); }
 
-        .income-text { color: var(--income); font-weight: 700; font-size: 15px; }
-        .expense-text { color: var(--expense); font-weight: 700; font-size: 15px; }
+        .income-text { color: var(--income); font-weight: 500; font-size: 15px; }
+        .expense-text { color: var(--expense); font-weight: 500; font-size: 15px; }
 
         .actions {
             display: flex;
@@ -291,28 +246,26 @@
         }
 
         .action-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 4px 10px;
             font-size: 12px;
-            color: var(--text-main);
+            color: var(--text-muted);
             cursor: pointer;
-            transition: 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .action-btn:active { transform: scale(0.9); background: var(--surface-active); }
+        .action-btn:hover { color: var(--text-main); }
 
         .analytics {
-            margin-top: 10px;
-            padding: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
         }
 
         .cat-row {
             display: flex;
             justify-content: space-between;
             padding: 10px 0;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px dashed var(--border);
             font-size: 14px;
         }
         
@@ -323,9 +276,8 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            font-size: 18px;
-            color: var(--expense);
-            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-muted);
         }
     </style>
 </head>
@@ -333,42 +285,42 @@
 <body>
 
 <div id="denied" class="denied" style="display:none;">
-    ⛔ Доступ заборонено
+    Доступ заборонено
 </div>
 
 <div class="app" id="app" style="display:none;">
 
     <div class="title-container">
-        <div class="title">TEQRA • DUO</div>
+        <div class="title">TEQRA DUO</div>
     </div>
     
     <div class="filter-row">
-        <div class="list-header">Огляд місяця</div>
+        <div class="list-header" style="margin: 0;">Огляд місяця</div>
         <input type="month" id="monthFilter">
     </div>
 
-    <div class="glass balance-card">
+    <div class="balance-card">
         <div class="balance-label">Загальний баланс</div>
         <div class="balance-amount" id="totalBalance">0</div>
-        <div style="font-size: 13px; color: var(--text-muted); font-weight: 500;">
+        <div style="font-size: 12px; color: var(--text-muted);">
             Витрачено від доходу: <span id="percentUsed" style="color:var(--text-main)">0%</span>
         </div>
     </div>
 
     <div class="cardRow">
-        <div class="glass card">
+        <div class="card">
             <div class="user-title">Іра</div>
-            <div class="stat-row"><span>Вхід:</span> <span class="highlight" id="iraIncome">0</span></div>
-            <div class="stat-row"><span>Вихід:</span> <span class="highlight" id="iraExpense">0</span></div>
+            <div class="stat-row"><span>Вхід</span> <span class="highlight" id="iraIncome">0</span></div>
+            <div class="stat-row"><span>Вихід</span> <span class="highlight" id="iraExpense">0</span></div>
             <div class="divider"></div>
-            <div class="stat-row"><span>Бал:</span> <span style="color:var(--primary); font-weight:700;" id="iraBalance">0</span></div>
+            <div class="stat-row"><span>Баланс</span> <span style="color:var(--text-main); font-weight:600;" id="iraBalance">0</span></div>
         </div>
-        <div class="glass card">
+        <div class="card">
             <div class="user-title">Міша</div>
-            <div class="stat-row"><span>Вхід:</span> <span class="highlight" id="mishaIncome">0</span></div>
-            <div class="stat-row"><span>Вихід:</span> <span class="highlight" id="mishaExpense">0</span></div>
+            <div class="stat-row"><span>Вхід</span> <span class="highlight" id="mishaIncome">0</span></div>
+            <div class="stat-row"><span>Вихід</span> <span class="highlight" id="mishaExpense">0</span></div>
             <div class="divider"></div>
-            <div class="stat-row"><span>Бал:</span> <span style="color:var(--primary); font-weight:700;" id="mishaBalance">0</span></div>
+            <div class="stat-row"><span>Баланс</span> <span style="color:var(--text-main); font-weight:600;" id="mishaBalance">0</span></div>
         </div>
     </div>
 
@@ -382,24 +334,23 @@
         <button id="expenseBtn">Витрата (-)</button>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 10px;">
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
         <input type="text" inputmode="decimal" id="amount" placeholder="Сума (напр. 500)" onfocus="this.select()">
-        <input type="text" id="category" placeholder="Категорія (напр. Тканина, Кава)">
+        <input type="text" id="category" placeholder="Категорія (напр. Тканина)">
         <button class="main" id="addBtn">Додати запис</button>
     </div>
 
-    <div class="list-header" style="margin-top: 15px;">Історія операцій</div>
-    
-    <div class="hist-switch">
-        <button id="histAllBtn" class="active">Всі</button>
-        <button id="histIncBtn">Доходи</button>
-        <button id="histExpBtn">Витрати</button>
+    <div style="margin-top: 24px;">
+        <div class="hist-switch">
+            <button id="histAllBtn" class="active">Всі операції</button>
+            <button id="histIncBtn">Доходи</button>
+            <button id="histExpBtn">Витрати</button>
+        </div>
+        <div id="list"></div>
     </div>
 
-    <div id="list"></div>
-
-    <div class="glass analytics">
-        <div class="list-header" style="margin-top: 0; margin-bottom: 10px;">Топ витрат</div>
+    <div class="analytics">
+        <div class="list-header">Аналітика витрат</div>
         <div id="analyticsBox"></div>
     </div>
 
@@ -424,10 +375,8 @@
 
     const tg = window.Telegram.WebApp;
     tg.expand(); 
-    
-    // Колір хедера Телеграму під стиль додатку
-    tg.setHeaderColor('#050505');
-    tg.setBackgroundColor('#050505');
+    tg.setHeaderColor('#000000');
+    tg.setBackgroundColor('#000000');
     
     const allowed = [7255848995, 921509542]; 
     const uid = tg.initDataUnsafe?.user?.id;
@@ -494,8 +443,6 @@
         currentType = "income";
         elements.incomeBtn.classList.add("active");
         elements.expenseBtn.classList.remove("active");
-        elements.addBtn.style.background = 'var(--income)';
-        elements.addBtn.style.boxShadow = '0 8px 24px var(--glow-income)';
         triggerHaptic('light');
     });
 
@@ -503,8 +450,6 @@
         currentType = "expense";
         elements.expenseBtn.classList.add("active");
         elements.incomeBtn.classList.remove("active");
-        elements.addBtn.style.background = 'var(--expense)';
-        elements.addBtn.style.boxShadow = '0 8px 24px var(--glow-expense)';
         triggerHaptic('light');
     });
 
@@ -530,12 +475,11 @@
 
         if (isNaN(amount) || amount <= 0 || !category) {
             triggerHaptic('error');
-            alert("Введи коректну суму та категорію!");
             return;
         }
 
         elements.addBtn.disabled = true;
-        elements.addBtn.innerText = "⏳...";
+        elements.addBtn.innerText = "Обробка...";
 
         try {
             await addDoc(ref, {
@@ -580,10 +524,7 @@
             if (newAmountStr === null) return;
             
             const newAmount = parseFloat(newAmountStr.replace(',', '.'));
-            if (isNaN(newAmount) || newAmount <= 0) {
-                alert("Некоректна сума!");
-                return;
-            }
+            if (isNaN(newAmount) || newAmount <= 0) return;
 
             const newCategory = prompt("Нова категорія:", oldCategory);
             if (newCategory === null || newCategory.trim() === "") return;
@@ -605,7 +546,7 @@
         
         const selectedMonth = elements.monthFilter.value;
 
-        allDocs.forEach((docSnap, index) => {
+        allDocs.forEach((docSnap) => {
             const d = docSnap.data();
             const id = docSnap.id;
             
@@ -637,8 +578,6 @@
 
             const div = document.createElement("div");
             div.className = "item";
-            // Додаємо невелику затримку для анімації кожного наступного елемента списку
-            div.style.animationDelay = `${index * 0.05}s`;
             
             const sign = d.type === "income" ? "+" : "-";
             const colorClass = d.type === "income" ? "income-text" : "expense-text";
@@ -646,13 +585,13 @@
             div.innerHTML = `
                 <div style="flex:1">
                     <div class="item-category">${d.category}</div>
-                    <div class="meta">${d.author} • ${dateStr}</div>
+                    <div class="meta">${d.author} &middot; ${dateStr}</div>
                 </div>
                 <div style="text-align:right">
                     <div class="${colorClass}">${sign} ${formatMoney(d.amount)} ₴</div>
                     <div class="actions">
-                        <div class="action-btn edit-btn" data-id="${id}" data-amount="${d.amount}" data-category="${d.category}">Ред.</div>
-                        <div class="action-btn del-btn" data-id="${id}" style="color: var(--expense); border-color: rgba(255, 59, 48, 0.3);">Вид.</div>
+                        <div class="action-btn edit-btn" data-id="${id}" data-amount="${d.amount}" data-category="${d.category}">Ред</div>
+                        <div class="action-btn del-btn" data-id="${id}">Вид</div>
                     </div>
                 </div>`;
             
@@ -688,7 +627,7 @@
         sortedCats.forEach(([cat, sum]) => {
             const row = document.createElement("div");
             row.className = "cat-row";
-            row.innerHTML = `<span>${cat}</span> <span style="color:var(--expense); font-weight:600;">-${formatMoney(sum)} ₴</span>`;
+            row.innerHTML = `<span>${cat}</span> <span style="font-weight:500;">${formatMoney(sum)} ₴</span>`;
             analyticsBox.appendChild(row);
         });
     }
