@@ -9,20 +9,23 @@
 
     <style>
         :root {
-            --bg: #000000;
-            --card: #111111;
-            --border: #262626;
-            --text-main: #ececec;
-            --text-muted: #808080;
-            --income: #34d399;
-            --expense: #f87171;
-            --radius: 10px;
+            --bg: #09090b;
+            --surface: #141417;
+            --surface-elevated: #1c1c21;
+            --border: #27272a;
+            --text-main: #fcfcfc;
+            --text-muted: #8b8b93;
+            --income: #32d74b;  /* Apple Dark Mode Green */
+            --expense: #ff453a; /* Apple Dark Mode Red */
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
         }
 
         html, body {
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif;
             background: var(--bg);
             color: var(--text-main);
             -webkit-tap-highlight-color: transparent;
@@ -36,88 +39,102 @@
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 18px;
         }
 
-        .title-container {
-            text-align: center;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 4px;
         }
 
         .title {
-            font-size: 14px;
+            font-size: 16px;
             letter-spacing: 2px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-main);
         }
 
-        .filter-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .filter-row input[type="month"] {
-            background: transparent;
+        .header input[type="month"] {
+            background: var(--surface-elevated);
             border: 1px solid var(--border);
             color: var(--text-main);
-            padding: 6px 10px;
+            padding: 8px 12px;
             font-size: 14px;
-            border-radius: 6px;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
             font-family: inherit;
             outline: none;
+            cursor: pointer;
         }
 
         .balance-card {
-            background: var(--card);
+            background: linear-gradient(145deg, #1c1c21 0%, #111114 100%);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 24px;
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
         .balance-label {
             font-size: 12px;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
 
         .balance-amount {
-            font-size: 38px;
+            font-size: 44px;
             font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 8px;
+            letter-spacing: -1.5px;
+            margin-bottom: 12px;
+        }
+
+        .percent-badge {
+            display: inline-block;
+            background: var(--bg);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
         }
 
         .cardRow {
             display: flex;
-            gap: 12px;
+            gap: 14px;
         }
 
         .card {
             flex: 1;
-            background: var(--card);
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 16px;
+            border-radius: var(--radius-lg);
+            padding: 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .user-title {
             font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 12px;
+            font-size: 15px;
+            margin-bottom: 14px;
             text-align: center;
             color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 14px;
             color: var(--text-muted);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .stat-row:last-child { margin-bottom: 0; }
@@ -126,33 +143,35 @@
         .divider {
             height: 1px;
             background: var(--border);
-            margin: 10px 0;
+            margin: 12px 0;
         }
 
+        /* Преміальні перемикачі (як в iOS) */
         .switch {
             display: flex;
-            background: var(--card);
-            border: 1px solid var(--border);
+            background: var(--surface);
             padding: 4px;
-            border-radius: var(--radius);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
         }
 
         .switch button {
             flex: 1;
             padding: 10px;
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             border: none;
             background: transparent;
             color: var(--text-muted);
-            font-weight: 500;
+            font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            transition: 0.1s;
+            transition: all 0.2s ease;
         }
 
         .switch button.active {
-            background: #262626;
+            background: var(--surface-elevated);
             color: var(--text-main);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
 
         .switch button#expenseBtn.active { color: var(--expense); }
@@ -161,122 +180,140 @@
         .hist-switch {
             display: flex;
             gap: 8px;
-            margin-bottom: 4px;
+            margin-bottom: 12px;
         }
         
         .hist-switch button {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border: 1px solid transparent;
-            background: transparent;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--surface);
             color: var(--text-muted);
             font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s;
         }
         
         .hist-switch button.active {
-            background: var(--card);
-            border-color: var(--border);
-            color: var(--text-main);
+            background: var(--text-main);
+            color: var(--bg);
+            border-color: var(--text-main);
         }
 
+        /* Поля вводу */
         input[type="text"] {
             width: 100%;
-            padding: 14px;
-            border-radius: var(--radius);
+            padding: 16px;
+            border-radius: var(--radius-md);
             border: 1px solid var(--border);
-            background: transparent;
+            background: var(--surface);
             color: var(--text-main);
-            font-size: 15px;
+            font-size: 16px;
             box-sizing: border-box;
             outline: none;
+            transition: border-color 0.2s, background 0.2s;
         }
         
         input[type="text"]:focus {
-            border-color: #555;
+            border-color: #52525b;
+            background: var(--surface-elevated);
         }
         
-        input[type="text"]::placeholder { color: #555; }
+        input[type="text"]::placeholder { color: #52525b; }
 
+        /* Головна кнопка */
         button.main {
             width: 100%;
-            padding: 14px;
-            border-radius: var(--radius);
+            padding: 16px;
+            border-radius: var(--radius-md);
             border: none;
             background: var(--text-main);
             color: var(--bg);
             font-weight: 600;
-            font-size: 15px;
+            font-size: 16px;
             cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
         }
 
-        button.main:active { opacity: 0.8; }
-        button.main:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.main:active { transform: scale(0.98); }
+        button.main:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        .list-header {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-top: 10px;
+            margin-bottom: 4px;
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
         }
 
-        .item:last-child { border-bottom: none; }
+        .item-category { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+        .meta { font-size: 13px; color: var(--text-muted); }
 
-        .item-category { font-weight: 500; font-size: 15px; margin-bottom: 4px; }
-        .meta { font-size: 12px; color: var(--text-muted); }
-
-        .income-text { color: var(--income); font-weight: 500; font-size: 15px; }
-        .expense-text { color: var(--expense); font-weight: 500; font-size: 15px; }
+        .income-text { color: var(--income); font-weight: 600; font-size: 16px; }
+        .expense-text { color: var(--text-main); font-weight: 600; font-size: 16px; }
 
         .actions {
             display: flex;
-            gap: 12px;
-            margin-top: 6px;
+            gap: 16px;
+            margin-top: 8px;
             justify-content: flex-end;
         }
 
         .action-btn {
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 500;
             color: var(--text-muted);
             cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            transition: color 0.2s;
         }
         
         .action-btn:hover { color: var(--text-main); }
+        .action-btn.del-btn:hover { color: var(--expense); }
 
         .analytics {
             margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
         }
 
         .cat-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px dashed var(--border);
-            font-size: 14px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 15px;
         }
         
-        .cat-row:last-child { border-bottom: none; }
+        .cat-row:last-child { border-bottom: none; padding-bottom: 0; }
 
         .denied {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: 600;
             color: var(--text-muted);
         }
     </style>
@@ -290,20 +327,16 @@
 
 <div class="app" id="app" style="display:none;">
 
-    <div class="title-container">
+    <div class="header">
         <div class="title">TEQRA DUO</div>
-    </div>
-    
-    <div class="filter-row">
-        <div class="list-header" style="margin: 0;">Огляд місяця</div>
         <input type="month" id="monthFilter">
     </div>
 
     <div class="balance-card">
         <div class="balance-label">Загальний баланс</div>
         <div class="balance-amount" id="totalBalance">0</div>
-        <div style="font-size: 12px; color: var(--text-muted);">
-            Витрачено від доходу: <span id="percentUsed" style="color:var(--text-main)">0%</span>
+        <div class="percent-badge">
+            Витрачено: <span id="percentUsed" style="color:var(--text-main); font-weight: 600;">0%</span>
         </div>
     </div>
 
@@ -313,14 +346,14 @@
             <div class="stat-row"><span>Вхід</span> <span class="highlight" id="iraIncome">0</span></div>
             <div class="stat-row"><span>Вихід</span> <span class="highlight" id="iraExpense">0</span></div>
             <div class="divider"></div>
-            <div class="stat-row"><span>Баланс</span> <span style="color:var(--text-main); font-weight:600;" id="iraBalance">0</span></div>
+            <div class="stat-row"><span>Баланс</span> <span style="color:var(--text-main); font-weight:600; font-size:15px;" id="iraBalance">0</span></div>
         </div>
         <div class="card">
             <div class="user-title">Міша</div>
             <div class="stat-row"><span>Вхід</span> <span class="highlight" id="mishaIncome">0</span></div>
             <div class="stat-row"><span>Вихід</span> <span class="highlight" id="mishaExpense">0</span></div>
             <div class="divider"></div>
-            <div class="stat-row"><span>Баланс</span> <span style="color:var(--text-main); font-weight:600;" id="mishaBalance">0</span></div>
+            <div class="stat-row"><span>Баланс</span> <span style="color:var(--text-main); font-weight:600; font-size:15px;" id="mishaBalance">0</span></div>
         </div>
     </div>
 
@@ -334,23 +367,24 @@
         <button id="expenseBtn">Витрата (-)</button>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
         <input type="text" inputmode="decimal" id="amount" placeholder="Сума (напр. 500)" onfocus="this.select()">
-        <input type="text" id="category" placeholder="Категорія (напр. Тканина)">
+        <input type="text" id="category" placeholder="Категорія (напр. Тканина, Реклама)">
         <button class="main" id="addBtn">Додати запис</button>
     </div>
 
-    <div style="margin-top: 24px;">
-        <div class="hist-switch">
-            <button id="histAllBtn" class="active">Всі операції</button>
+    <div style="margin-top: 16px;">
+        <div class="section-title">Історія операцій</div>
+        <div class="hist-switch" style="margin-top: 12px;">
+            <button id="histAllBtn" class="active">Всі</button>
             <button id="histIncBtn">Доходи</button>
             <button id="histExpBtn">Витрати</button>
         </div>
-        <div id="list"></div>
+        <div id="list" class="list-container"></div>
     </div>
 
     <div class="analytics">
-        <div class="list-header">Аналітика витрат</div>
+        <div class="section-title" style="margin-top: 0; margin-bottom: 16px; font-size: 16px;">Аналітика витрат</div>
         <div id="analyticsBox"></div>
     </div>
 
@@ -375,8 +409,8 @@
 
     const tg = window.Telegram.WebApp;
     tg.expand(); 
-    tg.setHeaderColor('#000000');
-    tg.setBackgroundColor('#000000');
+    tg.setHeaderColor('#09090b');
+    tg.setBackgroundColor('#09090b');
     
     const allowed = [7255848995, 921509542]; 
     const uid = tg.initDataUnsafe?.user?.id;
@@ -588,10 +622,10 @@
                     <div class="meta">${d.author} &middot; ${dateStr}</div>
                 </div>
                 <div style="text-align:right">
-                    <div class="${colorClass}">${sign} ${formatMoney(d.amount)} ₴</div>
+                    <div class="${colorClass}">${sign}${formatMoney(d.amount)} ₴</div>
                     <div class="actions">
-                        <div class="action-btn edit-btn" data-id="${id}" data-amount="${d.amount}" data-category="${d.category}">Ред</div>
-                        <div class="action-btn del-btn" data-id="${id}">Вид</div>
+                        <div class="action-btn edit-btn" data-id="${id}" data-amount="${d.amount}" data-category="${d.category}">Редагувати</div>
+                        <div class="action-btn del-btn" data-id="${id}">Видалити</div>
                     </div>
                 </div>`;
             
@@ -621,13 +655,13 @@
         const sortedCats = Object.entries(expenseCategories).sort((a, b) => b[1] - a[1]);
         
         if (sortedCats.length === 0) {
-            analyticsBox.innerHTML = "<div style='text-align:center; color: var(--text-muted); padding:10px; font-size: 13px;'>Немає витрат</div>";
+            analyticsBox.innerHTML = "<div style='text-align:center; color: var(--text-muted); padding:10px; font-size: 14px;'>Немає витрат</div>";
         }
 
         sortedCats.forEach(([cat, sum]) => {
             const row = document.createElement("div");
             row.className = "cat-row";
-            row.innerHTML = `<span>${cat}</span> <span style="font-weight:500;">${formatMoney(sum)} ₴</span>`;
+            row.innerHTML = `<span style="font-weight: 500;">${cat}</span> <span style="font-weight:600;">${formatMoney(sum)} ₴</span>`;
             analyticsBox.appendChild(row);
         });
     }
